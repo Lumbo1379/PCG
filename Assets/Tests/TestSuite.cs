@@ -12,4 +12,10 @@ public class TestSuite
 
         Assert.AreEqual(ans, 2);
     }
+
+    [Test]
+    public void SimpleTest2()
+    {
+        Assert.AreEqual(true, true);
+    }
 }
