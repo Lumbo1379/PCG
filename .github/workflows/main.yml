@@ -18,7 +18,4 @@ jobs:
         # Run tests
         - name: Run Tests
           run: /opt/Unity/Editor/Unity -batchmode -nographics -silent-crashes -noUpm -logFile -projectPath . -runEditorTests -editorTestsResultFile ./test-results/results.xml
-          uses: actions/upload-artifact@v1
-            name: unit-tests-results
-            path: test_results
        
