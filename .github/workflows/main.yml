@@ -14,4 +14,10 @@ jobs:
         # Activate unity
         - name: Activate Unity
           run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -silent-crashes -logFile -manualLicenseFile .github/Unity_v2019.x.ulf || exit 0
+          
+        # Run tests
+        - name: Run Tests
+        - run: /opt/Unity/Editor/Unity -batchmode -nographics -silent-crashes -noUpm -logFile -projectPath . -runEditorTests -editorTestsResultFile ./test-results/results.xml
+        - store_test_results:
+          path: test_results
        
