@@ -1,3 +1,4 @@
+
 version: 2.1
 executors:
   unity:
@@ -9,8 +10,31 @@ jobs:
     executor: unity
     steps:
       - checkout
-      - run: openssl aes-256-cbc -d -salt -pbkdf2 -k ${ secrets.UNITY_LICENSE_DECRYPT_KEY } -in .github/Unity_v2019.x.ulf.enc -out .github/Unity_v2019.x.ulf
+
+      # Install zip
+      - run: apt-get update
+      - run: apt-get install zip -y
+
+      # Decrypt the license file
+      - run:  openssl aes-256-cbc -d -salt -pbkdf2 -k ${UNITY_LICENSE_DECRYPT_KEY} -in .github/Unity_v2019.x.ulf.enc -out .github/Unity_v2019.x.ulf
+      
+      # Activate unity
       - run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -silent-crashes -logFile -manualLicenseFile .circleci/Unity_v2019.x.ulf || exit 0
+      
+      # Build Windows and OSX
+      - run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -silent-crashes -logFile -projectPath . -buildWindows64Player ./bin-win64/CISample.exe
+      - run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -silent-crashes -logFile -projectPath . -buildOSXUniversalPlayer ./bin-osx/CISample.app      
+      
+      # Zip builds
+      - run: zip -r CISampleWin64Binary.zip ./bin-win64
+      - run: zip -r CISampleOSXBinary.zip ./bin-osx
+
+      # Store builds
+      - store_artifacts:
+          path: ./CISampleWin64Binary.zip
+      - store_artifacts:
+          path: ./CISampleOSXBinary.zip
+
 workflows:
   version: 2
   build:
