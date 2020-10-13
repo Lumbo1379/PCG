@@ -9,7 +9,7 @@ class Jenkins
 {
     static string[] SCENES = FindEnabledEditorScenes();
 
-    static string APP_NAME = "YourProject";
+    static string APP_NAME = "PCG";
     static string TARGET_DIR = "target";
 
     [MenuItem("Build Windows")]
