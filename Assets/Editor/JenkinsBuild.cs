@@ -12,7 +12,6 @@ class JenkinsBuild
     static string APP_NAME = "PCG";
     static string TARGET_DIR = "target";
 
-    [MenuItem("Build Windows")]
     static void BuildWindows64()
     {
         string targetDir = APP_NAME + ".app";
