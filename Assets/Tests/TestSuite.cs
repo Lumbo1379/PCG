@@ -16,6 +16,6 @@ public class TestSuite
     [Test]
     public void SimpleTest2()
     {
-        Assert.AreEqual(true, true);
+        Assert.AreEqual(true, false);
     }
 }
