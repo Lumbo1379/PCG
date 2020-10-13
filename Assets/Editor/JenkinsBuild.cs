@@ -27,11 +27,6 @@ class JenkinsBuild
     static void GenericBuild(string[] scenes, string targetDir, BuildTarget buildTarget, BuildOptions buildOptions)
     {
         EditorUserBuildSettings.SwitchActiveBuildTarget(buildTarget);
-        string res = BuildPipeline.BuildPlayer(scenes, targetDir, buildTarget, buildOptions).ToString();
-
-        if (res.Length > 0)
-        {
-            throw new Exception("BuildPlayer failure: " + res);
-        }
+        BuildPipeline.BuildPlayer(scenes, targetDir, buildTarget, buildOptions).ToString();
     }
 }
