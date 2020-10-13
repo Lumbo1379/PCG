@@ -13,13 +13,13 @@ class JenkinsBuild
     private static string APP_NAME = "PCG";
     private static string TARGET_DIR = "target";
 
-    private static void BuildWindows64()
+    public static void BuildWindows64()
     {
         string targetDir = APP_NAME + ".app";
         GenericBuild(SCENES, TARGET_DIR + "/" + targetDir, BuildTarget.StandaloneWindows64, BuildOptions.None);
     }
 
-    private static void RunEditorUnitTest()
+    public static void RunEditorUnitTests()
     {
         var testRunnerApi = ScriptableObject.CreateInstance<TestRunnerApi>();
         var filter = new Filter()
