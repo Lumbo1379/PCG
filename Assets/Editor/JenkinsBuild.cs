@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-class Jenkins
+class JenkinsBuild
 {
     static string[] SCENES = FindEnabledEditorScenes();
 
