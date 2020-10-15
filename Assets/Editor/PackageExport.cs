@@ -62,6 +62,11 @@ public static class PackageExport
             testMode = TestMode.EditMode
         };
         testRunnerApi.Execute(new ExecutionSettings(filter));
+
+        using (StreamWriter sw = new StreamWriter("tests-test.txt", true))
+        {
+            sw.Write("Testing...");
+        }
     }
 
     private class MyCallbacks : ICallbacks
@@ -83,7 +88,7 @@ public static class PackageExport
 
         public void TestFinished(ITestResultAdaptor result)
         {
-            using (StreamWriter sw = new StreamWriter("tests.txt", true))
+            using (StreamWriter sw = new StreamWriter("tests-output.txt", true))
             {
                     sw.Write(("Test {0} {1}", result.Test.Name, result.ResultState));
             }
