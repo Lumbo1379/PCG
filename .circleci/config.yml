@@ -15,9 +15,6 @@ jobs:
       - store_artifacts:
           path: ./CISample.unitypackage
           destination: ./CISample.unitypackage
-      - run: /opt/Unity/Editor/Unity -batchmode -nographics -silent-crashes -noUpm -logFile -projectPath . -runEditorTests -editorTestsResultFile ./test-results/results.xml
-      - store_test_results:
-          path: test_results
 workflows:
   version: 2
   build:
