@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -7,27 +8,44 @@ using UnityEngine;
 // must put on global namespace
 public static class PackageExport
 {
-    // method must be static
-    [MenuItem("Tools/Export Unitypackage")]
-    public static void Export()
+    static string kAppName = Application.productName;
+    static string kTargetPath = "Builds";
+    static string[] kScenes = FindEnabledEditorScenes();
+
+    private static string[] FindEnabledEditorScenes()
     {
-        // configure
-        var root = "Scripts/CISample";
-        var exportPath = "./CISample.unitypackage";
+        List<string> EditorScenes = new List<string>();
+        foreach (EditorBuildSettingsScene scene in EditorBuildSettings.scenes)
+        {
+            if (!scene.enabled) continue;
+            EditorScenes.Add(scene.path);
+        }
+        return EditorScenes.ToArray();
+    }
 
-        var path = Path.Combine(Application.dataPath, root);
-        var assets = Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories)
-            .Where(x => Path.GetExtension(x) == ".cs")
-            .Select(x => "Assets" + x.Replace(Application.dataPath, "").Replace(@"\", "/"))
-            .ToArray();
+    static void GenericBuild(string[] scenes, string targetPath, BuildTarget buildTarget, BuildOptions buildOptions)
+    {
+        bool splashscreenshow = PlayerSettings.SplashScreen.show;
+        PlayerSettings.SplashScreen.show = false;
+        UnityEditor.Build.Reporting.BuildReport report = BuildPipeline.BuildPlayer(scenes, targetPath, buildTarget, buildOptions);
+        PlayerSettings.SplashScreen.show = splashscreenshow;
+        if (report.summary.result != UnityEditor.Build.Reporting.BuildResult.Succeeded)
+        {
+            Debug.LogError("Build Failed " + report.summary.result);
+            if (UnityEditorInternal.InternalEditorUtility.inBatchMode) EditorApplication.Exit(1);
+        }
+        else
+        {
+            Debug.Log("Windows version has now been built.");
+            Debug.Log("DONE");
+        }
+    }
 
-        UnityEngine.Debug.Log("Export below files" + Environment.NewLine + string.Join(Environment.NewLine, assets));
-
-        AssetDatabase.ExportPackage(
-            assets,
-            exportPath,
-            ExportPackageOptions.Default);
-
-        UnityEngine.Debug.Log("Export complete: " + Path.GetFullPath(exportPath));
+    [MenuItem("Lost Words/Build/Win64Final", false, 0)]
+    static void PerformWin64FinalBuild()
+    {
+        BuildOptions options = BuildOptions.None;
+        EditorUserBuildSettings.development = false;
+        GenericBuild(kScenes, kTargetPath + "/Win64/" + kAppName + ".exe", BuildTarget.StandaloneWindows64, options);
     }
 }
