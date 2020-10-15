@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 
 // must put on global namespace
 public static class PackageExport
 {
     static string kAppName = Application.productName;
-    static string kTargetPath = "Builds";
+    static string kTargetPathBuilds = "Builds";
+    static string kTargetPathTests = "Tests";
     static string[] kScenes = FindEnabledEditorScenes();
 
     private static string[] FindEnabledEditorScenes()
@@ -42,11 +44,49 @@ public static class PackageExport
         }
     }
 
-    [MenuItem("Lost Words/Build/Win64Final", false, 0)]
+    [MenuItem("PCG/Build/Win64Final", false, 0)]
     static void PerformWin64FinalBuild()
     {
         BuildOptions options = BuildOptions.None;
         EditorUserBuildSettings.development = false;
-        GenericBuild(kScenes, kTargetPath + "/Win64/" + kAppName + ".exe", BuildTarget.StandaloneWindows64, options);
+        GenericBuild(kScenes, kTargetPathBuilds + "/Win64/" + kAppName + ".exe", BuildTarget.StandaloneWindows64, options);
+    }
+
+    [MenuItem("PCG/UnitTests", false, 1)]
+    static void PerformUnitTests()
+    {
+        var testRunnerApi = ScriptableObject.CreateInstance<TestRunnerApi>();
+        testRunnerApi.RegisterCallbacks(new MyCallbacks());
+        var filter = new Filter()
+        {
+            testMode = TestMode.EditMode
+        };
+        testRunnerApi.Execute(new ExecutionSettings(filter));
+    }
+
+    private class MyCallbacks : ICallbacks
+    {
+        public void RunStarted(ITestAdaptor testsToRun)
+        {
+
+        }
+
+        public void RunFinished(ITestResultAdaptor result)
+        {
+
+        }
+
+        public void TestStarted(ITestAdaptor test)
+        {
+
+        }
+
+        public void TestFinished(ITestResultAdaptor result)
+        {
+            using (StreamWriter sw = new StreamWriter("tests.txt", true))
+            {
+                    sw.Write(("Test {0} {1}", result.Test.Name, result.ResultState));
+            }
+        }
     }
 }
