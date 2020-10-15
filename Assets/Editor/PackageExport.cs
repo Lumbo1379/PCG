@@ -32,6 +32,7 @@ public static class PackageExport
         if (report.summary.result != UnityEditor.Build.Reporting.BuildResult.Succeeded)
         {
             Debug.LogError("Build Failed " + report.summary.result);
+            Console.WriteLine("Build Failed " + report.summary.result);
             if (UnityEditorInternal.InternalEditorUtility.inBatchMode) EditorApplication.Exit(1);
         }
         else
