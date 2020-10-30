@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 
-public class TestSuite
+public class TestSuiteEdit
 {
     [Test]
     public void SimpleTest()
@@ -12,10 +13,4 @@ public class TestSuite
 
         Assert.AreEqual(ans, 2);
     }
-
-    // [Test]
-    // public void SimpleTest2()
-    // {
-        // Assert.AreEqual(true, false);
-    // }
 }

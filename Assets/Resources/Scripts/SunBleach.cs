@@ -54,4 +54,16 @@ public class SunBleach : MonoBehaviour
 
         mat.SetColor("DefaultColour", _bleachedColour);
     }
+
+    public void SetFacesAndBleach(bool top = false, bool bottom = false, bool left = false, bool right = false, bool front = false, bool back = false)
+    {
+        _top = top;
+        _bottom = bottom;
+        _left = left;
+        _right = right;
+        _front = front;
+        _back = back;
+
+        BleachFaces();
+    }
 }
