@@ -1,0 +1,63 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class RoadPiece : MonoBehaviour
+{
+    public int X_CHANGE;
+    public int Y_CHANGE;
+
+    [Header("Bounds", order = 0)]
+    [SerializeField] private GameObject _topLeft;
+    [SerializeField] private GameObject _topRight;
+    [SerializeField] private GameObject _bottomLeft;
+    [SerializeField] private GameObject _bottomRight;
+
+    [Header("Bones", order = 1)]
+    [SerializeField] private GameObject[] _bones;
+
+    public float BoneRotation { get; set; }
+    public float HeadRotation { get; set; }
+    public bool HeadConnected { get; set; }
+    public bool TailConnected { get; set; }
+    public GameObject HeadConnection { get; set; }
+    public GameObject TailConnection { get; set; }
+
+    public float IntersectionDecrease
+    {
+        get { return _intersectionDecrease += 0.01f; }
+        set => _intersectionDecrease = value;
+    }
+
+    public GameObject GetTopLeft() { return _topLeft; }
+    public GameObject GetTopRight() { return _topRight; }
+    public GameObject GetBottomLeft() { return _bottomLeft; }
+    public GameObject GetBottomRight() { return _bottomRight; }
+    public GameObject[] GetBones() { return _bones; }
+
+    private float _intersectionDecrease = 0;
+
+    public void SetBoneRotations(float rotation)
+    {
+        if (rotation > 18.75f)
+            rotation -= 30.0f;
+        else if (rotation < -18.75f)
+            rotation += 30.0f;
+
+        BoneRotation = rotation;
+
+        foreach (var bone in _bones)
+        {
+            var newRotation = new Vector3(bone.transform.rotation.eulerAngles.x, bone.transform.rotation.eulerAngles.y, rotation);
+            bone.transform.rotation = Quaternion.Euler(newRotation.x, newRotation.y, newRotation.z);
+        }
+    }
+
+    public void SetHeadRotation(float rotation)
+    {
+        HeadRotation = rotation;
+
+        var newRotation = new Vector3(90, 0, rotation * _bones.Length);
+        transform.rotation = Quaternion.Euler(newRotation.x, newRotation.y, newRotation.z);
+    }
+}
