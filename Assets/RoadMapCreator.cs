@@ -30,8 +30,6 @@ public class RoadMapCreator : MonoBehaviour
     private bool[,] _roadMap; // True is road, false is empty
     private GameObject[,] _roadMapObjects;
     private List<List<Point>> _islands;
-    private int _debugCurrentRow;
-    private int _debugCurrentColumn;
     private int _debugPointIndex;
 
     private float[,] _cost;
@@ -53,8 +51,6 @@ public class RoadMapCreator : MonoBehaviour
         _closed = new bool[_length, _width];
         _inPath = new bool[_length, _width];
 
-        _debugCurrentColumn = 0;
-        _debugCurrentRow = 0;
         _debugPointIndex = 0;
         _step = false;
     }
@@ -66,21 +62,6 @@ public class RoadMapCreator : MonoBehaviour
 
     private void Update()
     {
-        //if (_stepThroughCheckForConnection && _step && _debugCurrentRow < _length)
-        //{
-        //    DebugMapRoads(_debugCurrentRow, _debugCurrentColumn);
-
-        //    _debugCurrentColumn++;
-
-        //    if (_debugCurrentColumn >= _width)
-        //    {
-        //        _debugCurrentColumn = 0;
-        //        _debugCurrentRow++;
-        //    }
-
-        //    _step = false;
-        //}
-
         if (_stepThroughCheckForConnection && _step && _islands != null && _debugPointIndex < _islands[0].Count)
         {
             _roadMapObjects[_islands[0][_debugPointIndex].X, _islands[0][_debugPointIndex].Y].SetActive(true);
@@ -485,36 +466,6 @@ public class RoadMapCreator : MonoBehaviour
         Debug.Log("Map wrote to file!");
     }
 
-    private void MapRoads()
-    {
-        for (int row = 0; row < _length; row++)
-        {
-            for (int column = 0; column < _width; column++)
-            {
-                if (_roadMap[row, column])
-                {
-                    var road = Instantiate(_roadPiece);
-                    road.transform.position = new Vector3(row * 10, 0, column * 42);
-                    _roadMapObjects[row, column] = road;
-
-                    //CheckForConnections(row, column, road);
-                }
-            }
-        }
-    }
-
-    private void DebugMapRoads(int row, int column)
-    {
-        if (_roadMap[row, column])
-        {
-            var road = Instantiate(_roadPiece);
-            road.transform.position = new Vector3(row * 10, 0, column * 42);
-            _roadMapObjects[row, column] = road;
-
-            //CheckForConnections(row, column, road);
-        }
-    }
-
     private void ConnectRoad(int row, int column, bool[,] searched, int prevRow, int prevColumn)
     {
         if (row < 0 || row >= _length) return;
@@ -540,13 +491,6 @@ public class RoadMapCreator : MonoBehaviour
 
                 if (xChange == -1 && yChange == -1)
                 {
-                    //float rotation = 3.75f - prevRoadPiece.BoneRotation - prevRoadPiece.HeadRotation;
-
-                    //currentRoadPiece.SetHeadRotation(rotation);
-                    //currentRoadPiece.SetBoneRotations(-rotation);
-
-                    //ConnectRoadsFromTail(prevRoad, _roadMapObjects[row, column]);
-
                     ConnectRoadsFromHead(prevRoad, _roadMapObjects[row, column]);
 
                     if (prevRoadPiece.TailConnected)
@@ -556,39 +500,12 @@ public class RoadMapCreator : MonoBehaviour
                 }
                 else if (xChange == -1 && yChange == 1)
                 {
-                    //float rotation = -3.75f - prevRoadPiece.BoneRotation - prevRoadPiece.HeadRotation;
-
-                    //currentRoadPiece.SetHeadRotation(rotation);
-                    //currentRoadPiece.SetBoneRotations(-rotation);
-
-                    //ConnectRoadsFromTail(prevRoad, _roadMapObjects[row, column]);
-
                     ConnectRoadsFromHead(prevRoad, _roadMapObjects[row, column]);
 
                     if (prevRoadPiece.TailConnected)
                         CreateIntersection(_roadMapObjects[row, column], prevRoadPiece.IntersectionDecrease);
 
                     currentRoadPiece.SetBoneRotations(11.25f - prevRoadPiece.BoneRotation - prevRoadPiece.HeadRotation);
-                }
-                else if (xChange == -1)
-                {
-                    //ConnectRoadsFromTail(prevRoad, _roadMapObjects[row, column]);
-
-                    ConnectRoadsFromHead(prevRoad, _roadMapObjects[row, column]);
-
-                    if (prevRoadPiece.TailConnected)
-                        CreateIntersection(_roadMapObjects[row, column], prevRoadPiece.IntersectionDecrease);
-
-                    currentRoadPiece.SetBoneRotations(15.0f - prevRoadPiece.BoneRotation - prevRoadPiece.HeadRotation);
-                }
-                else if (yChange == -1)
-                {
-                    ConnectRoadsFromHead(prevRoad, _roadMapObjects[row, column]);
-
-                    if (prevRoadPiece.TailConnected)
-                        CreateIntersection(_roadMapObjects[row, column], prevRoadPiece.IntersectionDecrease);
-
-                    currentRoadPiece.SetBoneRotations(-7.5f - prevRoadPiece.BoneRotation - prevRoadPiece.HeadRotation);
                 }
                 else if (xChange == 1 && yChange == -1)
                 {
@@ -626,6 +543,25 @@ public class RoadMapCreator : MonoBehaviour
 
                     currentRoadPiece.SetBoneRotations(7.5f - prevRoadPiece.BoneRotation - prevRoadPiece.HeadRotation);
                 }
+                else if (xChange == -1)
+                {
+
+                    ConnectRoadsFromHead(prevRoad, _roadMapObjects[row, column]);
+
+                    if (prevRoadPiece.TailConnected)
+                        CreateIntersection(_roadMapObjects[row, column], prevRoadPiece.IntersectionDecrease);
+
+                    currentRoadPiece.SetBoneRotations(15.0f - prevRoadPiece.BoneRotation - prevRoadPiece.HeadRotation);
+                }
+                else if (yChange == -1)
+                {
+                    ConnectRoadsFromHead(prevRoad, _roadMapObjects[row, column]);
+
+                    if (prevRoadPiece.TailConnected)
+                        CreateIntersection(_roadMapObjects[row, column], prevRoadPiece.IntersectionDecrease);
+
+                    currentRoadPiece.SetBoneRotations(-7.5f - prevRoadPiece.BoneRotation - prevRoadPiece.HeadRotation);
+                }
             }
 
             ConnectRoad(row + 1, column, searched, row, column);
@@ -638,71 +574,6 @@ public class RoadMapCreator : MonoBehaviour
             ConnectRoad(row - 1, column - 1, searched, row, column);
         }
     }
-
-    //private void CheckForConnections(int row, int column, GameObject road)
-    //{
-    //    var roadPiece = road.GetComponent<RoadPiece>();
-    //    bool intersection;
-
-    //    // --Connecting from head--
-
-    //    if (row > 0 && column > 0 && _roadMap[row - 1, column - 1])
-    //    {
-    //        var tail = _roadMapObjects[row - 1, column - 1].GetComponent<RoadPiece>();
-    //        intersection = tail.TailConnected;
-
-    //        ConnectRoadsFromHead(_roadMapObjects[row - 1, column - 1], road);
-
-    //        if (intersection) // Do after so not to affect transformation
-    //            CreateIntersection(road, tail.IntersectionDecrease);
-    //    }
-    //    else if (row > 0 && _roadMap[row - 1, column])
-    //    {
-    //        var tail = _roadMapObjects[row - 1, column].GetComponent<RoadPiece>();
-    //        intersection = tail.TailConnected;
-
-    //        ConnectRoadsFromHead(_roadMapObjects[row - 1, column], road);
-
-    //        if (intersection) // Do after so not to affect transformation
-    //            CreateIntersection(road, tail.IntersectionDecrease);
-    //    }
-    //    else if (row > 0 && column < _width - 1 && _roadMap[row - 1, column + 1])
-    //    {
-    //        var tail = _roadMapObjects[row - 1, column + 1].GetComponent<RoadPiece>();
-    //        intersection = tail.TailConnected;
-
-    //        ConnectRoadsFromHead(_roadMapObjects[row - 1, column + 1], road);
-
-    //        if (intersection) // Do after so not to affect transformation
-    //            CreateIntersection(road, tail.IntersectionDecrease);
-    //    }
-    //    else if (column > 0 && _roadMap[row, column - 1])
-    //    {
-    //        var tail = _roadMapObjects[row, column - 1].GetComponent<RoadPiece>();
-    //        intersection = tail.TailConnected;
-
-    //        ConnectRoadsFromHead(_roadMapObjects[row, column - 1], road);
-
-    //        if (intersection) // Do after so not to affect transformation
-    //            CreateIntersection(road, tail.IntersectionDecrease);
-    //    }
-
-    //    // --Rotating for head connections--
-
-    //    // No rotation for [row + 1, column] (below)
-    //    if (row < _length - 1 && column > 0 && _roadMap[row + 1, column - 1])
-    //    {
-    //        roadPiece.SetBoneRotations(1.875f);
-    //    }
-    //    else if (row < _length - 1 && column < _width - 1 && _roadMap[row + 1, column + 1])
-    //    {
-    //        roadPiece.SetBoneRotations(-1.875f);
-    //    }
-    //    else if (column < _width - 1 && _roadMap[row, column + 1])
-    //    {
-    //        roadPiece.SetBoneRotations(-3.75f);
-    //    }
-    //}
 
     private void ConnectRoadsFromHead(GameObject existingRoad, GameObject connectingRoad) // Uses bone rotation on existing to set head rotation on connecting
     {
