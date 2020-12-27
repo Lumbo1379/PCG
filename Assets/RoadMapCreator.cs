@@ -627,6 +627,8 @@ public class RoadMapCreator : MonoBehaviour
     {
         var roadPiece = road.GetComponent<RoadPiece>();
 
+        if (roadPiece.HeadConnection != null && roadPiece.HeadConnection.GetComponent<RoadPiece>().IsIntersection) return; // Don't place plots on intersecting roads
+
         var plotLeft = Instantiate(_plotPiece);
         var plotRight = Instantiate(_plotPiece);
 
@@ -638,6 +640,13 @@ public class RoadMapCreator : MonoBehaviour
 
         plotRight.transform.position = rightRoadPiecePlotMarker.transform.position;
         plotRight.transform.rotation = rightRoadPiecePlotMarker.transform.rotation;
+
+        roadPiece.CanMakePlots = true;
+        roadPiece.LeftPlotMarker = plotLeft.GetComponent<PlotMarker>();
+        roadPiece.RightPlotMarker = plotRight.GetComponent<PlotMarker>();
+
+        plotLeft.GetComponent<PlotMarker>().Initialise(roadPiece, true);
+        plotRight.GetComponent<PlotMarker>().Initialise(roadPiece, false);
     }
 }
 

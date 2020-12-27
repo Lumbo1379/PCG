@@ -16,16 +16,24 @@ public class RoadPiece : MonoBehaviour
     [SerializeField] private GameObject _head;
     [SerializeField] private GameObject[] _bones;
 
+    public bool CanMakePlots { get; set; }
+    public bool IsIntersection { get; set; }
     public float BoneRotation { get; set; }
     public float HeadRotation { get; set; }
     public bool HeadConnected { get; set; }
     public bool TailConnected { get; set; }
     public GameObject HeadConnection { get; set; }
     public GameObject TailConnection { get; set; }
+    public PlotMarker LeftPlotMarker { get; set; }
+    public PlotMarker RightPlotMarker { get; set; }
 
     public float IntersectionDecrease
     {
-        get { return _intersectionDecrease += 0.01f; }
+        get 
+        {
+            IsIntersection = true;
+            return _intersectionDecrease += 0.01f; 
+        }
         set => _intersectionDecrease = value;
     }
 
