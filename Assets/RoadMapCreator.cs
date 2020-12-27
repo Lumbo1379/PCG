@@ -11,8 +11,8 @@ public class RoadMapCreator : MonoBehaviour
     [SerializeField] private int _width = 256;
     [SerializeField] private int _length = 256;
     [SerializeField] private float _resolution = 20;
-    [SerializeField] [Range(0, 100000)] private float _maxOffsetX = 1000;
-    [SerializeField] [Range(0, 100000)] private float _maxOffsetY = 1000;
+    [SerializeField] [Range(0, 100000)] private int _maxOffsetX = 1000;
+    [SerializeField] [Range(0, 100000)] private int _maxOffsetY = 1000;
 
     [Header("Road Generation", order = 1)]
     [SerializeField] private GameObject _roadPiece;
@@ -20,13 +20,19 @@ public class RoadMapCreator : MonoBehaviour
 
     [Header("Debug", order = 2)]
     [SerializeField] private TMP_Text _mapText;
+    [SerializeField] private TMP_Text _seedText;
     [SerializeField] private bool _generateFile = false;
     [SerializeField] private bool _stepThroughCheckForConnection = false;
     [SerializeField] private bool _step;
     [SerializeField] private Color32 _seenColour = new Color32(255, 0, 0, 255);
 
-    private float _offsetX;
-    private float _offsetY;
+    [Header("Seed", order = 3)]
+    [SerializeField] private bool _useSpecificSeed;
+    [SerializeField] private int _seedX;
+    [SerializeField] private int _seedY;
+
+    private int _offsetX;
+    private int _offsetY;
     private bool[,] _roadMap; // True is road, false is empty
     private GameObject[,] _roadMapObjects;
     private List<List<Point>> _islands;
@@ -40,8 +46,19 @@ public class RoadMapCreator : MonoBehaviour
 
     private void Awake()
     {
-        _offsetX = Random.Range(0, _maxOffsetX);
-        _offsetY = Random.Range(0, _maxOffsetY);
+        if (!_useSpecificSeed)
+        {
+            _offsetX = Random.Range(0, _maxOffsetX);
+            _offsetY = Random.Range(0, _maxOffsetY);
+        }
+        else
+        {
+            _offsetX = _seedX;
+            _offsetY = _seedY;
+        }
+
+        _seedText.text = "Seed (" + _offsetX + ", " + _offsetY + ")";
+
         _roadMap = new bool[_length, _width];
         _roadMapObjects = new GameObject[_length, _width];
 
