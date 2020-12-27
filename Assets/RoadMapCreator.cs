@@ -505,11 +505,13 @@ public class RoadMapCreator : MonoBehaviour
                 var prevRoadPiece = prevRoad.GetComponent<RoadPiece>();
                 var currentRoadPiece = _roadMapObjects[row, column].GetComponent<RoadPiece>();
 
+                bool needsIntersection = prevRoadPiece.TailConnected;
+
                 if (xChange == -1 && yChange == -1)
                 {
                     ConnectRoadsFromHead(prevRoad, _roadMapObjects[row, column]);
 
-                    if (prevRoadPiece.TailConnected)
+                    if (needsIntersection)
                         CreateIntersection(_roadMapObjects[row, column], prevRoadPiece.IntersectionDecrease);
 
                     currentRoadPiece.SetBoneRotations(-11.25f - prevRoadPiece.BoneRotation - prevRoadPiece.HeadRotation);
@@ -518,7 +520,7 @@ public class RoadMapCreator : MonoBehaviour
                 {
                     ConnectRoadsFromHead(prevRoad, _roadMapObjects[row, column]);
 
-                    if (prevRoadPiece.TailConnected)
+                    if (needsIntersection)
                         CreateIntersection(_roadMapObjects[row, column], prevRoadPiece.IntersectionDecrease);
 
                     currentRoadPiece.SetBoneRotations(11.25f - prevRoadPiece.BoneRotation - prevRoadPiece.HeadRotation);
@@ -527,7 +529,7 @@ public class RoadMapCreator : MonoBehaviour
                 {
                     ConnectRoadsFromHead(prevRoad, _roadMapObjects[row, column]);
 
-                    if (prevRoadPiece.TailConnected)
+                    if (needsIntersection)
                         CreateIntersection(_roadMapObjects[row, column], prevRoadPiece.IntersectionDecrease);
 
                     currentRoadPiece.SetBoneRotations(-3.75f - prevRoadPiece.BoneRotation - prevRoadPiece.HeadRotation);
@@ -536,7 +538,7 @@ public class RoadMapCreator : MonoBehaviour
                 {
                     ConnectRoadsFromHead(prevRoad, _roadMapObjects[row, column]);
 
-                    if (prevRoadPiece.TailConnected)
+                    if (needsIntersection)
                         CreateIntersection(_roadMapObjects[row, column], prevRoadPiece.IntersectionDecrease);
 
                     currentRoadPiece.SetBoneRotations(3.75f - prevRoadPiece.BoneRotation - prevRoadPiece.HeadRotation);
@@ -545,7 +547,7 @@ public class RoadMapCreator : MonoBehaviour
                 {
                     ConnectRoadsFromHead(prevRoad, _roadMapObjects[row, column]);
 
-                    if (prevRoadPiece.TailConnected)
+                    if (needsIntersection)
                         CreateIntersection(_roadMapObjects[row, column], prevRoadPiece.IntersectionDecrease);
 
                     currentRoadPiece.SetBoneRotations(0 - prevRoadPiece.BoneRotation - prevRoadPiece.HeadRotation);
@@ -554,7 +556,7 @@ public class RoadMapCreator : MonoBehaviour
                 {
                     ConnectRoadsFromHead(prevRoad, _roadMapObjects[row, column]);
 
-                    if (prevRoadPiece.TailConnected)
+                    if (needsIntersection)
                         CreateIntersection(_roadMapObjects[row, column], prevRoadPiece.IntersectionDecrease);
 
                     currentRoadPiece.SetBoneRotations(7.5f - prevRoadPiece.BoneRotation - prevRoadPiece.HeadRotation);
@@ -564,7 +566,7 @@ public class RoadMapCreator : MonoBehaviour
 
                     ConnectRoadsFromHead(prevRoad, _roadMapObjects[row, column]);
 
-                    if (prevRoadPiece.TailConnected)
+                    if (needsIntersection)
                         CreateIntersection(_roadMapObjects[row, column], prevRoadPiece.IntersectionDecrease);
 
                     currentRoadPiece.SetBoneRotations(15.0f - prevRoadPiece.BoneRotation - prevRoadPiece.HeadRotation);
@@ -573,7 +575,7 @@ public class RoadMapCreator : MonoBehaviour
                 {
                     ConnectRoadsFromHead(prevRoad, _roadMapObjects[row, column]);
 
-                    if (prevRoadPiece.TailConnected)
+                    if (needsIntersection)
                         CreateIntersection(_roadMapObjects[row, column], prevRoadPiece.IntersectionDecrease);
 
                     currentRoadPiece.SetBoneRotations(-7.5f - prevRoadPiece.BoneRotation - prevRoadPiece.HeadRotation);
