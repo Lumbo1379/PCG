@@ -503,9 +503,6 @@ public class RoadMapCreator : MonoBehaviour
                 var prevRoadPiece = prevRoad.GetComponent<RoadPiece>();
                 var currentRoadPiece = _roadMapObjects[row, column].GetComponent<RoadPiece>();
 
-                currentRoadPiece.X_CHANGE = xChange;
-                currentRoadPiece.Y_CHANGE = yChange;
-
                 if (xChange == -1 && yChange == -1)
                 {
                     ConnectRoadsFromHead(prevRoad, _roadMapObjects[row, column]);

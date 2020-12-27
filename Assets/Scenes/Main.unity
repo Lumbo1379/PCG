@@ -573,7 +573,7 @@ MonoBehaviour:
   _resolution: 30
   _maxOffsetX: 1000
   _maxOffsetY: 1000
-  _roadPiece: {fileID: 8563029636596908377, guid: 0d2947b2b0cb6fd4a80f4f53ba4a31e1,
+  _roadPiece: {fileID: 340882230768278369, guid: a3f414a9ee29b9447b53f25527894f5e,
     type: 3}
   _minRoadValue: 0.45
   _mapText: {fileID: 1609622121}

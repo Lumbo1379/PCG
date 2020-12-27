@@ -4,16 +4,16 @@ using UnityEngine;
 
 public class RoadPiece : MonoBehaviour
 {
-    public int X_CHANGE;
-    public int Y_CHANGE;
-
     [Header("Bounds", order = 0)]
     [SerializeField] private GameObject _topLeft;
     [SerializeField] private GameObject _topRight;
     [SerializeField] private GameObject _bottomLeft;
     [SerializeField] private GameObject _bottomRight;
+    [SerializeField] private GameObject _middleLeft;
+    [SerializeField] private GameObject _middleRight;
 
-    [Header("Bones", order = 1)]
+    [Header("Pieces", order = 1)]
+    [SerializeField] private GameObject _head;
     [SerializeField] private GameObject[] _bones;
 
     public float BoneRotation { get; set; }
@@ -33,6 +33,8 @@ public class RoadPiece : MonoBehaviour
     public GameObject GetTopRight() { return _topRight; }
     public GameObject GetBottomLeft() { return _bottomLeft; }
     public GameObject GetBottomRight() { return _bottomRight; }
+    public GameObject GetMiddleLeft() { return _middleLeft; }
+    public GameObject GetMiddleRight() { return _middleRight; }
     public GameObject[] GetBones() { return _bones; }
 
     private float _intersectionDecrease = 0;
@@ -58,6 +60,6 @@ public class RoadPiece : MonoBehaviour
         HeadRotation = rotation;
 
         var newRotation = new Vector3(90, 0, rotation * _bones.Length);
-        transform.rotation = Quaternion.Euler(newRotation.x, newRotation.y, newRotation.z);
+        _head.transform.rotation = Quaternion.Euler(newRotation.x, newRotation.y, newRotation.z);
     }
 }
