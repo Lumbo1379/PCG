@@ -576,6 +576,8 @@ MonoBehaviour:
   _roadPiece: {fileID: 340882230768278369, guid: a3f414a9ee29b9447b53f25527894f5e,
     type: 3}
   _minRoadValue: 0.45
+  _plotPiece: {fileID: 1213616471487895199, guid: 6f04e442aa2ea7e4d9b38a0cfee985de,
+    type: 3}
   _mapText: {fileID: 1609622121}
   _seedText: {fileID: 1743846230}
   _generateFile: 1

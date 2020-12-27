@@ -18,7 +18,10 @@ public class RoadMapCreator : MonoBehaviour
     [SerializeField] private GameObject _roadPiece;
     [SerializeField] [Range(0, 1)] private float _minRoadValue = 0.5f;
 
-    [Header("Debug", order = 2)]
+    [Header("Plot Generation", order = 2)]
+    [SerializeField] private GameObject _plotPiece;
+
+    [Header("Debug", order = 3)]
     [SerializeField] private TMP_Text _mapText;
     [SerializeField] private TMP_Text _seedText;
     [SerializeField] private bool _generateFile = false;
@@ -26,7 +29,7 @@ public class RoadMapCreator : MonoBehaviour
     [SerializeField] private bool _step;
     [SerializeField] private Color32 _seenColour = new Color32(255, 0, 0, 255);
 
-    [Header("Seed", order = 3)]
+    [Header("Seed", order = 4)]
     [SerializeField] private bool _useSpecificSeed;
     [SerializeField] private int _seedX;
     [SerializeField] private int _seedY;
@@ -120,12 +123,11 @@ public class RoadMapCreator : MonoBehaviour
         if (_generateFile)
             WriteMapToFile();
 
-        //if (!_stepThroughCheckForConnection)
-        //    MapRoads();
-
         var firstRoad = GetFirstRoad();
         bool[,] searched = new bool[_length, _width];
         ConnectRoad(firstRoad.X, firstRoad.Y, searched, -1, -1);
+
+        MapPlots();
 
         if (_stepThroughCheckForConnection)
         {
@@ -606,26 +608,34 @@ public class RoadMapCreator : MonoBehaviour
         connectingRoadPiece.HeadConnected = true;
     }
 
-    private void ConnectRoadsFromTail(GameObject existingRoad, GameObject connectingRoad) // Uses bone rotation on existing to set head rotation on connecting
-    {
-        var existingRoadPiece = existingRoad.GetComponent<RoadPiece>();
-        var connectingRoadPiece = connectingRoad.GetComponent<RoadPiece>();
-
-        connectingRoadPiece.SetBoneRotations(existingRoadPiece.HeadRotation);
-
-        var transformation = existingRoadPiece.GetTopLeft().transform.position - connectingRoadPiece.GetBottomLeft().transform.position;
-        connectingRoad.transform.position += transformation;
-
-        existingRoadPiece.HeadConnection = connectingRoad;
-        connectingRoadPiece.TailConnection = existingRoad;
-
-        existingRoadPiece.HeadConnected = true;
-        connectingRoadPiece.TailConnected = true;
-    }
-
     private void CreateIntersection(GameObject road, float yDecrease)
     {
         road.transform.position += new Vector3(0, yDecrease, 0);
+    }
+
+    private void MapPlots()
+    {
+        foreach (var roadPoint in _islands[0])
+        {
+            PlacePlotMarkerPair(_roadMapObjects[roadPoint.X, roadPoint.Y]);
+        }
+    }
+
+    private void PlacePlotMarkerPair(GameObject road)
+    {
+        var roadPiece = road.GetComponent<RoadPiece>();
+
+        var plotLeft = Instantiate(_plotPiece);
+        var plotRight = Instantiate(_plotPiece);
+
+        var leftRoadPiecePlotMarker = roadPiece.GetMiddleLeft();
+        var rightRoadPiecePlotMarker = roadPiece.GetMiddleRight();
+
+        plotLeft.transform.position = leftRoadPiecePlotMarker.transform.position;
+        plotLeft.transform.rotation = leftRoadPiecePlotMarker.transform.rotation;
+
+        plotRight.transform.position = rightRoadPiecePlotMarker.transform.position;
+        plotRight.transform.rotation = rightRoadPiecePlotMarker.transform.rotation;
     }
 }
 
