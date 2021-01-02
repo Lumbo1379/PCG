@@ -4,18 +4,24 @@ using UnityEngine;
 
 public class PlotMarker : MonoBehaviour
 {
+    public GameObject ROADCOLLISION;
 
-    public GameObject INTERSECTION;
-    public GameObject INTERSECTIONTAIL;
+    [Header("Plot Connections")]
+    [SerializeField] private LayerMask _plotConnectionMask;
+    [SerializeField] [Range(0, 500)] private float _maxConnectionDistance;
 
     [Header("Debug", order = 1)]
     [SerializeField] private bool _showRayCasts;
 
+    public bool ContainedInPlot { get; set; } = false;
+
     private RoadPiece _road;
     private PlotMarker _leftConnection;
     private PlotMarker _rightConnection;
+    private PlotMarker _plotConnection;
     private bool _isInitialised;
     private bool _isLeftPlotMarker;
+    private Vector3 _forwardDirection;
 
     private bool _showConnectionRays;
 
@@ -29,6 +35,11 @@ public class PlotMarker : MonoBehaviour
         _road = road;
         _isLeftPlotMarker = isLeftPlotMarker;
         _isInitialised = true;
+
+        if (isLeftPlotMarker)
+            _forwardDirection = transform.TransformDirection(Vector3.right);
+        else
+            _forwardDirection = transform.TransformDirection(Vector3.left);
 
         ShowConnectionRays();
     }
@@ -49,6 +60,15 @@ public class PlotMarker : MonoBehaviour
 
         if (_showRayCasts)
             DrawDebugRays();
+    }
+
+    private void LateUpdate()
+    {
+        if (_isInitialised)
+        {
+            if (!StillHasConnectionsToMake() && !ContainedInPlot)
+                TryMakeFinalPlotConnection();
+        }
     }
 
     private void MakeInitialConnections()
@@ -90,9 +110,6 @@ public class PlotMarker : MonoBehaviour
         while (intersectionTailTail != null && intersectionTailTail.TailConnection != null && !intersectionTailTail.CanMakePlots)
             intersectionTailTail = intersectionTailTail.TailConnection.GetComponent<RoadPiece>();
 
-        INTERSECTION = intersection.gameObject;
-        INTERSECTIONTAIL = intersectionTailTail.gameObject;
-
         if (_isLeftPlotMarker)
         {
             if (IsValidConnection(intersection))
@@ -102,8 +119,8 @@ public class PlotMarker : MonoBehaviour
             }
             else if (intersectionTailTail != null && intersectionTailTail.CanMakePlots && intersectionTailTail != _road)
             {
-                _leftConnection = intersectionTailTail.RightPlotMarker;
-                intersectionTailTail.RightPlotMarker._rightConnection = _road.LeftPlotMarker;
+                _rightConnection = intersectionTailTail.RightPlotMarker;
+                intersectionTailTail.RightPlotMarker._leftConnection = _road.LeftPlotMarker;
             }
         }
         else
@@ -115,8 +132,8 @@ public class PlotMarker : MonoBehaviour
             }
             else if (intersectionTailTail != null && intersectionTailTail.CanMakePlots && intersectionTailTail != _road)
             {
-                _rightConnection = intersectionTailTail.LeftPlotMarker;
-                intersectionTailTail.LeftPlotMarker._leftConnection = _road.RightPlotMarker;
+                _leftConnection = intersectionTailTail.LeftPlotMarker;
+                intersectionTailTail.LeftPlotMarker._rightConnection = _road.RightPlotMarker;
             }
         }
 
@@ -177,6 +194,103 @@ public class PlotMarker : MonoBehaviour
         }
     }
 
+    private void TryMakeFinalPlotConnection()
+    {
+        RaycastHit hit;
+        RoadPiece roadHit = null;
+
+        if (Physics.Raycast(transform.position, _forwardDirection , out hit, _maxConnectionDistance, _plotConnectionMask))
+        {
+            roadHit = hit.transform.root.GetComponent<RoadPiece>();
+        }
+
+        if (roadHit == null || !roadHit.CanMakePlots) return;
+
+        ROADCOLLISION = roadHit.gameObject;
+
+        PlotMarker marker;
+
+        if (IsCollisionOnLeftSide(hit.point, roadHit))
+            marker = roadHit.LeftPlotMarker;
+        else
+            marker = roadHit.RightPlotMarker;
+
+        bool cycleFound = false;
+        bool leftCycle = false;
+        bool cycleEncountered = false;
+
+        PlotMarker dummy = marker._leftConnection;
+
+        while (dummy != null)
+        {
+            if (dummy == this)
+            {
+                leftCycle = true;
+                cycleFound = true;
+
+                break;
+            }
+
+            if (dummy._plotConnection == null)
+                dummy = dummy._leftConnection;
+            else
+            {
+                if (cycleEncountered) break;
+
+                dummy = dummy._plotConnection._leftConnection;
+                cycleEncountered = true;
+            }
+
+            if (dummy != null && dummy._plotConnection == null && dummy.ContainedInPlot) break;
+        }
+        
+        if (!cycleFound)
+        {
+            dummy = marker._rightConnection;
+            cycleEncountered = false;
+
+            while (dummy != null)
+            {
+                if (dummy == this)
+                {
+                    cycleFound = true;
+
+                    break;
+                }
+
+                if (dummy._plotConnection == null)
+                    dummy = dummy._rightConnection;
+                else
+                {
+                    if (cycleEncountered) break;
+
+                    dummy = dummy._plotConnection._rightConnection;
+                    cycleEncountered = true;
+                }
+
+                if (dummy != null && dummy._plotConnection == null && dummy.ContainedInPlot) return;
+            }
+        }
+
+        if (!cycleFound) return;
+
+        dummy = marker;
+
+        while (dummy != this)
+        {
+            dummy.ContainedInPlot = true;
+
+            if (leftCycle)
+                dummy = dummy._leftConnection;
+            else
+                dummy = dummy._rightConnection;
+        }
+
+        ContainedInPlot = true;
+        _plotConnection = marker;
+        marker._plotConnection = this;
+    }
+
     private bool IsValidConnection(RoadPiece road)
     {
         if (road == null) return false;
@@ -217,6 +331,13 @@ public class PlotMarker : MonoBehaviour
         return true;
     }
 
+    private bool IsCollisionOnLeftSide(Vector3 hitPosition, RoadPiece road)
+    {
+        if (Vector3.Distance(hitPosition, road.LeftPlotMarker.transform.position) <= Vector3.Distance(hitPosition, road.RightPlotMarker.transform.position)) return true;
+
+        return false;
+    }
+
     private void DrawDebugRays()
     {
         if (_showConnectionRays)
@@ -228,9 +349,12 @@ public class PlotMarker : MonoBehaviour
                 Debug.DrawRay(transform.position, Vector3.Normalize(_rightConnection.transform.position - transform.position) * Vector3.Distance(transform.position, _rightConnection.transform.position), Color.blue);
 
             if (_isLeftPlotMarker)
-                Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.right) * 10, Color.green);
+                Debug.DrawRay(transform.position, _forwardDirection * 10, Color.green);
             else
-                Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.left) * 10, Color.green);
+                Debug.DrawRay(transform.position, _forwardDirection * 10, Color.green);
+
+            if (_plotConnection != null)
+                Debug.DrawRay(transform.position, Vector3.Normalize(_plotConnection.transform.position - transform.position) * Vector3.Distance(transform.position, _plotConnection.transform.position), Color.magenta);
         }
         else
         {
