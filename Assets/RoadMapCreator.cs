@@ -21,7 +21,7 @@ public class RoadMapCreator : MonoBehaviour
     [Header("Plot Generation", order = 2)]
     [SerializeField] private GameObject _plotPiece;
 
-    [Header("Debug", order = 3)]
+    [Header("Debug Road Generation", order = 3)]
     [SerializeField] private TMP_Text _mapText;
     [SerializeField] private TMP_Text _seedText;
     [SerializeField] private bool _generateFile = false;
@@ -29,7 +29,14 @@ public class RoadMapCreator : MonoBehaviour
     [SerializeField] private bool _step;
     [SerializeField] private Color32 _seenColour = new Color32(255, 0, 0, 255);
 
-    [Header("Seed", order = 4)]
+    [Header("Debug Plot Generation", order = 4)]
+    [SerializeField] private bool _debugPlots = false;
+    [SerializeField] private Color32 _highlightColour = new Color32(0, 255, 0, 255);
+    [SerializeField] private int _numberOfPlots;
+    [SerializeField] private int _plotIndexToHighlight = 0;
+    [SerializeField] private bool _highlightPlot = false;
+
+    [Header("Seed", order = 5)]
     [SerializeField] private bool _useSpecificSeed;
     [SerializeField] private int _seedX;
     [SerializeField] private int _seedY;
@@ -46,6 +53,10 @@ public class RoadMapCreator : MonoBehaviour
     private int[,] _linkY;
     private bool[,] _closed;
     private bool[,] _inPath;
+
+    private List<List<PlotMarker>> _plotContainers;
+    private int _lastHighlightedPlotIndex;
+    private Color32 _originalPlotColour;
 
     private void Awake()
     {
@@ -73,6 +84,13 @@ public class RoadMapCreator : MonoBehaviour
 
         _debugPointIndex = 0;
         _step = false;
+        _debugPlots = false;
+        _highlightPlot = false;
+        _plotIndexToHighlight = 0;
+        _lastHighlightedPlotIndex = -1;
+        _originalPlotColour = _plotPiece.GetComponent<MeshRenderer>().sharedMaterial.color;
+
+        _plotContainers = new List<List<PlotMarker>>();
     }
 
     private void Start()
@@ -99,6 +117,35 @@ public class RoadMapCreator : MonoBehaviour
             _debugPointIndex++;
             _mapText.UpdateVertexData(TMP_VertexDataUpdateFlags.All);
             _step = false;
+        }
+
+        if (_debugPlots)
+        {
+            _numberOfPlots = _plotContainers.Count;
+
+            if (_highlightPlot)
+            {
+                _highlightPlot = false;
+
+                if (_lastHighlightedPlotIndex != -1)
+                {
+                    foreach (var plot in _plotContainers[_lastHighlightedPlotIndex])
+                    {
+                        var plotMat = plot.GetComponent<MeshRenderer>().material;
+                        plotMat.color = _originalPlotColour;
+                    }
+                }
+
+                if (_plotIndexToHighlight > _numberOfPlots - 1) return;
+
+                foreach (var plot in _plotContainers[_plotIndexToHighlight])
+                {
+                    var plotMat = plot.GetComponent<MeshRenderer>().material;
+                    plotMat.color = _highlightColour;
+                }
+
+                _lastHighlightedPlotIndex = _plotIndexToHighlight;
+            }
         }
     }
 
@@ -645,8 +692,8 @@ public class RoadMapCreator : MonoBehaviour
         roadPiece.LeftPlotMarker = plotLeft.GetComponent<PlotMarker>();
         roadPiece.RightPlotMarker = plotRight.GetComponent<PlotMarker>();
 
-        plotLeft.GetComponent<PlotMarker>().Initialise(roadPiece, true);
-        plotRight.GetComponent<PlotMarker>().Initialise(roadPiece, false);
+        plotLeft.GetComponent<PlotMarker>().Initialise(roadPiece, true, _plotContainers);
+        plotRight.GetComponent<PlotMarker>().Initialise(roadPiece, false, _plotContainers);
     }
 }
 

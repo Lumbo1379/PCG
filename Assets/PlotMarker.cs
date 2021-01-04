@@ -5,6 +5,7 @@ using UnityEngine;
 public class PlotMarker : MonoBehaviour
 {
     public GameObject ROADCOLLISION;
+    public bool CHECKAGAIN = false;
 
     [Header("Plot Connections")]
     [SerializeField] private LayerMask _plotConnectionMask;
@@ -22,18 +23,23 @@ public class PlotMarker : MonoBehaviour
     private bool _isInitialised;
     private bool _isLeftPlotMarker;
     private Vector3 _forwardDirection;
+    private bool _triedToMakePlots;
 
     private bool _showConnectionRays;
 
+    private List<List<PlotMarker>> _plotContainers;
+
     private void Awake()
     {
-        _showRayCasts = false;        
+        _showRayCasts = false;
+        _triedToMakePlots = false;
     }
 
-    public void Initialise(RoadPiece road, bool isLeftPlotMarker)
+    public void Initialise(RoadPiece road, bool isLeftPlotMarker, List<List<PlotMarker>> plotContainers)
     {
         _road = road;
         _isLeftPlotMarker = isLeftPlotMarker;
+        _plotContainers = plotContainers;
         _isInitialised = true;
 
         if (isLeftPlotMarker)
@@ -66,8 +72,17 @@ public class PlotMarker : MonoBehaviour
     {
         if (_isInitialised)
         {
-            if (!StillHasConnectionsToMake() && !ContainedInPlot)
+            if (CHECKAGAIN)
+            {
+                CHECKAGAIN = false;
+                _triedToMakePlots = false;
+            }
+
+            if (!_triedToMakePlots && !StillHasConnectionsToMake() && !IsNextToPlot())
+            {
                 TryMakeFinalPlotConnection();
+                _triedToMakePlots = true;
+            }
         }
     }
 
@@ -215,6 +230,8 @@ public class PlotMarker : MonoBehaviour
         else
             marker = roadHit.RightPlotMarker;
 
+        if (marker._plotConnection != null) return;
+
         bool cycleFound = false;
         bool leftCycle = false;
         bool cycleEncountered = false;
@@ -240,8 +257,6 @@ public class PlotMarker : MonoBehaviour
                 dummy = dummy._plotConnection._leftConnection;
                 cycleEncountered = true;
             }
-
-            if (dummy != null && dummy._plotConnection == null && dummy.ContainedInPlot) break;
         }
         
         if (!cycleFound)
@@ -267,8 +282,6 @@ public class PlotMarker : MonoBehaviour
                     dummy = dummy._plotConnection._rightConnection;
                     cycleEncountered = true;
                 }
-
-                if (dummy != null && dummy._plotConnection == null && dummy.ContainedInPlot) return;
             }
         }
 
@@ -276,19 +289,48 @@ public class PlotMarker : MonoBehaviour
 
         dummy = marker;
 
-        while (dummy != this)
+        var plotContainer = new List<PlotMarker>();
+
+        while (dummy != this) // TODO: Fix this
         {
+            plotContainer.Add(dummy);
             dummy.ContainedInPlot = true;
 
             if (leftCycle)
-                dummy = dummy._leftConnection;
+            {
+                if (dummy._plotConnection == null)
+                {
+                    dummy = dummy._leftConnection;
+                }
+                else
+                {
+                    plotContainer.Add(dummy._plotConnection);
+                    dummy.ContainedInPlot = true;
+                    dummy = dummy._plotConnection._leftConnection;
+                }
+            }
             else
-                dummy = dummy._rightConnection;
+            {
+                if (dummy._plotConnection == null)
+                {
+                    dummy = dummy._rightConnection;
+                }
+                else
+                {
+                    plotContainer.Add(dummy._plotConnection);
+                    dummy.ContainedInPlot = true;
+                    dummy = dummy._plotConnection._rightConnection;
+                }
+            }
         }
+
+        plotContainer.Add(dummy);
+        dummy.ContainedInPlot = true;
 
         ContainedInPlot = true;
         _plotConnection = marker;
         marker._plotConnection = this;
+        _plotContainers.Add(plotContainer);
     }
 
     private bool IsValidConnection(RoadPiece road)
@@ -321,6 +363,15 @@ public class PlotMarker : MonoBehaviour
     private bool StillHasConnectionsToMake()
     {
         return _leftConnection == null || _rightConnection == null;
+    }
+
+    private bool IsNextToPlot()
+    {
+        if (_leftConnection != null && _leftConnection._plotConnection != null) return true;
+        if (_rightConnection != null && _rightConnection._plotConnection != null) return true;
+        if (_plotConnection != null) return true;
+
+        return false;
     }
 
     private bool CanMakeInitialConnections()
