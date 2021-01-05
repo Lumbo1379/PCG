@@ -41,6 +41,8 @@ public class RoadMapCreator : MonoBehaviour
     [SerializeField] private int _seedX;
     [SerializeField] private int _seedY;
 
+    public int PlotsToTryToMakeConnections { get; set; }
+
     private int _offsetX;
     private int _offsetY;
     private bool[,] _roadMap; // True is road, false is empty
@@ -55,6 +57,8 @@ public class RoadMapCreator : MonoBehaviour
     private bool[,] _inPath;
 
     private List<List<PlotMarker>> _plotContainers;
+    private bool _plotContainersMapped;
+
     private int _lastHighlightedPlotIndex;
     private Color32 _originalPlotColour;
 
@@ -91,6 +95,7 @@ public class RoadMapCreator : MonoBehaviour
         _originalPlotColour = _plotPiece.GetComponent<MeshRenderer>().sharedMaterial.color;
 
         _plotContainers = new List<List<PlotMarker>>();
+        _plotContainersMapped = false;
     }
 
     private void Start()
@@ -146,6 +151,54 @@ public class RoadMapCreator : MonoBehaviour
 
                 _lastHighlightedPlotIndex = _plotIndexToHighlight;
             }
+        }
+
+        if (!_plotContainersMapped && PlotsToTryToMakeConnections == 0)
+        {
+            foreach (var plotStart in _plotContainers)
+            {
+                PlotMarker dummy;
+                var firstPlot = plotStart[0];
+
+                if (firstPlot.IsLeftCycle)
+                    dummy = plotStart[0].GetPlotConnection().GetLeftConnection();
+                else
+                    dummy = plotStart[0].GetPlotConnection().GetRightConnection();
+
+                plotStart.Add(firstPlot.GetPlotConnection());
+
+                while (dummy != firstPlot)
+                {
+                    plotStart.Add(dummy);
+
+                    if (firstPlot.IsLeftCycle)
+                    {
+                        if (dummy.GetPlotConnection() == null)
+                        {
+                            dummy = dummy.GetLeftConnection();
+                        }
+                        else
+                        {
+                            plotStart.Add(dummy.GetPlotConnection());
+                            dummy = dummy.GetPlotConnection().GetLeftConnection();
+                        }
+                    }
+                    else
+                    {
+                        if (dummy.GetPlotConnection() == null)
+                        {
+                            dummy = dummy.GetRightConnection();
+                        }
+                        else
+                        {
+                            plotStart.Add(dummy.GetPlotConnection());
+                            dummy = dummy.GetPlotConnection().GetRightConnection();
+                        }
+                    }
+                }
+            }
+
+            _plotContainersMapped = true;
         }
     }
 
@@ -692,8 +745,10 @@ public class RoadMapCreator : MonoBehaviour
         roadPiece.LeftPlotMarker = plotLeft.GetComponent<PlotMarker>();
         roadPiece.RightPlotMarker = plotRight.GetComponent<PlotMarker>();
 
-        plotLeft.GetComponent<PlotMarker>().Initialise(roadPiece, true, _plotContainers);
-        plotRight.GetComponent<PlotMarker>().Initialise(roadPiece, false, _plotContainers);
+        plotLeft.GetComponent<PlotMarker>().Initialise(roadPiece, true, _plotContainers, this);
+        plotRight.GetComponent<PlotMarker>().Initialise(roadPiece, false, _plotContainers, this);
+
+        PlotsToTryToMakeConnections += 2;
     }
 }
 
