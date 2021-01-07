@@ -586,6 +586,19 @@ MonoBehaviour:
   _seenColour:
     serializedVersion: 2
     rgba: 4278190335
+  _debugPlots: 0
+  _highlightColour:
+    serializedVersion: 2
+    rgba: 4278255360
+  _numberOfPlots: 0
+  _plotIndexToHighlight: 0
+  _highlightPlot: 0
+  _debugBoundingBox: 0
+  _highlightBoundingBoxColour:
+    serializedVersion: 2
+    rgba: 4278223359
+  _plotIndexToHighlightBB: 0
+  _showBoundingBox: 0
   _useSpecificSeed: 1
   _seedX: 368
   _seedY: 688

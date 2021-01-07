@@ -33,10 +33,20 @@ public class RoadMapCreator : MonoBehaviour
     [SerializeField] private bool _debugPlots = false;
     [SerializeField] private Color32 _highlightColour = new Color32(0, 255, 0, 255);
     [SerializeField] private int _numberOfPlots;
+    [SerializeField] private PlotMarker _firstMarker;
+    [SerializeField] private PlotMarker _lastMarker;
+    [SerializeField] private bool _isLeftCycle;
     [SerializeField] private int _plotIndexToHighlight = 0;
     [SerializeField] private bool _highlightPlot = false;
 
-    [Header("Seed", order = 5)]
+    [Header("Debug Bounding Box Generation", order = 5)]
+    [SerializeField] private bool _debugBoundingBox = false;
+    [SerializeField] private Color32 _highlightBoundingBoxColour = new Color32(0, 255, 0, 255);
+    [SerializeField] private int _plotIndexToHighlightBB = 0;
+    [SerializeField] private BoxType _type;
+    [SerializeField] private bool _showBoundingBox = false;
+
+    [Header("Seed", order = 6)]
     [SerializeField] private bool _useSpecificSeed;
     [SerializeField] private int _seedX;
     [SerializeField] private int _seedY;
@@ -61,6 +71,8 @@ public class RoadMapCreator : MonoBehaviour
 
     private int _lastHighlightedPlotIndex;
     private Color32 _originalPlotColour;
+
+    private GameObject[] _previousBoundingBox;
 
     private void Awake()
     {
@@ -89,7 +101,9 @@ public class RoadMapCreator : MonoBehaviour
         _debugPointIndex = 0;
         _step = false;
         _debugPlots = false;
+        _debugBoundingBox = false;
         _highlightPlot = false;
+        _showBoundingBox = false;
         _plotIndexToHighlight = 0;
         _lastHighlightedPlotIndex = -1;
         _originalPlotColour = _plotPiece.GetComponent<MeshRenderer>().sharedMaterial.color;
@@ -131,6 +145,8 @@ public class RoadMapCreator : MonoBehaviour
             if (_highlightPlot)
             {
                 _highlightPlot = false;
+                _firstMarker = null;
+                _lastMarker = null;
 
                 if (_lastHighlightedPlotIndex != -1)
                 {
@@ -149,7 +165,75 @@ public class RoadMapCreator : MonoBehaviour
                     plotMat.color = _highlightColour;
                 }
 
+                _firstMarker = _plotContainers[_plotIndexToHighlight][0];
+                _lastMarker = _plotContainers[_plotIndexToHighlight][_plotContainers[_plotIndexToHighlight].Count - 1];
+                _isLeftCycle = _plotContainers[_plotIndexToHighlight][0].IsLeftCycle;
+
                 _lastHighlightedPlotIndex = _plotIndexToHighlight;
+            }
+        }
+
+        if (_debugBoundingBox)
+        {
+            _debugPlots = true;
+
+            if (_showBoundingBox)
+            {
+                _showBoundingBox = false;
+
+                if (_previousBoundingBox != null)
+                {
+                    for (int i = 0; i < _previousBoundingBox.Length; i++)
+                    {
+                        Destroy(_previousBoundingBox[i]);
+                    }
+                }
+
+                if (_plotIndexToHighlightBB > _numberOfPlots - 1) return;
+
+                var boundingBox = CreateOOB.GetMinRectangle(_plotContainers[_plotIndexToHighlightBB], _plotContainers[_plotIndexToHighlightBB][0].IsLeftCycle);
+
+                _type = boundingBox.Type;
+
+                _previousBoundingBox = new GameObject[5];
+
+                var centre = Instantiate(_plotPiece);
+                var centreMat = centre.GetComponent<MeshRenderer>().material;
+                centreMat.color = _highlightBoundingBoxColour;
+                centre.transform.position = new Vector3(boundingBox.Centre.x, 0, boundingBox.Centre.y);
+                _previousBoundingBox[0] = centre;
+
+                var corner1 = Instantiate(_plotPiece);
+                var corner1Mat = corner1.GetComponent<MeshRenderer>().material;
+                corner1Mat.color = _highlightBoundingBoxColour;
+                corner1.transform.position = new Vector3(boundingBox.Corners[0].x, 0, boundingBox.Corners[0].y);
+                _previousBoundingBox[1] = corner1;
+
+                var corner2 = Instantiate(_plotPiece);
+                var corner2Mat = corner2.GetComponent<MeshRenderer>().material;
+                corner2Mat.color = _highlightBoundingBoxColour;
+                corner2.transform.position = new Vector3(boundingBox.Corners[1].x, 0, boundingBox.Corners[1].y);
+                _previousBoundingBox[2] = corner2;
+
+                var corner3 = Instantiate(_plotPiece);
+                var corner3Mat = corner3.GetComponent<MeshRenderer>().material;
+                corner3Mat.color = _highlightBoundingBoxColour;
+                corner3.transform.position = new Vector3(boundingBox.Corners[2].x, 0, boundingBox.Corners[2].y);
+                _previousBoundingBox[3] = corner3;
+
+                var corner4 = Instantiate(_plotPiece);
+                var corner4Mat = corner4.GetComponent<MeshRenderer>().material;
+                corner4Mat.color = _highlightBoundingBoxColour;
+                corner4.transform.position = new Vector3(boundingBox.Corners[3].x, 0, boundingBox.Corners[3].y);
+                _previousBoundingBox[4] = corner4;
+            }
+
+            if (_previousBoundingBox != null)
+            {
+                Debug.DrawRay(_previousBoundingBox[1].transform.position, Vector3.Normalize(_previousBoundingBox[2].transform.position - _previousBoundingBox[1].transform.position) * Vector3.Distance(_previousBoundingBox[1].transform.position, _previousBoundingBox[2].transform.position), Color.yellow);
+                Debug.DrawRay(_previousBoundingBox[2].transform.position, Vector3.Normalize(_previousBoundingBox[3].transform.position - _previousBoundingBox[2].transform.position) * Vector3.Distance(_previousBoundingBox[2].transform.position, _previousBoundingBox[3].transform.position), Color.yellow);
+                Debug.DrawRay(_previousBoundingBox[3].transform.position, Vector3.Normalize(_previousBoundingBox[4].transform.position - _previousBoundingBox[3].transform.position) * Vector3.Distance(_previousBoundingBox[3].transform.position, _previousBoundingBox[4].transform.position), Color.yellow);
+                Debug.DrawRay(_previousBoundingBox[4].transform.position, Vector3.Normalize(_previousBoundingBox[1].transform.position - _previousBoundingBox[4].transform.position) * Vector3.Distance(_previousBoundingBox[4].transform.position, _previousBoundingBox[1].transform.position), Color.yellow);
             }
         }
 
