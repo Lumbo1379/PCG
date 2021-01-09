@@ -578,6 +578,7 @@ MonoBehaviour:
   _minRoadValue: 0.45
   _plotPiece: {fileID: 1213616471487895199, guid: 6f04e442aa2ea7e4d9b38a0cfee985de,
     type: 3}
+  _minPlotArea: 1000
   _mapText: {fileID: 1609622121}
   _seedText: {fileID: 1743846230}
   _generateFile: 1
@@ -591,13 +592,18 @@ MonoBehaviour:
     serializedVersion: 2
     rgba: 4278255360
   _numberOfPlots: 0
+  _firstMarker: {fileID: 0}
+  _lastMarker: {fileID: 0}
+  _isLeftCycle: 0
   _plotIndexToHighlight: 0
   _highlightPlot: 0
+  PLOTS: []
   _debugBoundingBox: 0
   _highlightBoundingBoxColour:
     serializedVersion: 2
     rgba: 4278223359
   _plotIndexToHighlightBB: 0
+  _type: 0
   _showBoundingBox: 0
   _useSpecificSeed: 1
   _seedX: 368

@@ -6,9 +6,6 @@ public class CreateOOB
 {
     public static Rectangle GetMinRectangle(List<PlotMarker> plotMarkers, bool isLeftCycle)
     {
-        //plotMarkers = OrderPoints(plotMarkers);
-        //plotMarkers = FlipOrder(plotMarkers);
-
         var tempMarkers = new List<PlotMarker>();
         tempMarkers.AddRange(plotMarkers);
 

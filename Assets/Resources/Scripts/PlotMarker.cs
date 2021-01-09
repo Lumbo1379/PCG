@@ -15,11 +15,11 @@ public class PlotMarker : MonoBehaviour
     [SerializeField] private bool _showRayCasts;
 
     public bool IsLeftCycle { get; set; }
+    public PlotMarker LeftConnection { get; set; }
+    public PlotMarker RightConnection { get; set; }
+    public PlotMarker ForwardConnection { get; set; }
 
     private RoadPiece _road;
-    private PlotMarker _leftConnection;
-    private PlotMarker _rightConnection;
-    private PlotMarker _plotConnection;
     private bool _isInitialised;
     private bool _isLeftPlotMarker;
     private Vector3 _forwardDirection;
@@ -57,7 +57,7 @@ public class PlotMarker : MonoBehaviour
 
     private void Update()
     {
-        if (_isInitialised)
+        if (_isInitialised && !_finishedMakingConnections)
         {
             if (CanMakeInitialConnections())
                 MakeInitialConnections();
@@ -104,19 +104,19 @@ public class PlotMarker : MonoBehaviour
 
         if (_isLeftPlotMarker)
         {
-            _leftConnection = roadAhead.LeftPlotMarker;
-            _rightConnection = roadBefore.LeftPlotMarker;
+            LeftConnection = roadAhead.LeftPlotMarker;
+            RightConnection = roadBefore.LeftPlotMarker;
 
-            roadAhead.LeftPlotMarker._rightConnection = _road.LeftPlotMarker;
-            roadBefore.LeftPlotMarker._leftConnection = _road.LeftPlotMarker;
+            roadAhead.LeftPlotMarker.RightConnection = _road.LeftPlotMarker;
+            roadBefore.LeftPlotMarker.LeftConnection = _road.LeftPlotMarker;
         }
         else
         {
-            _leftConnection = roadBefore.RightPlotMarker;
-            _rightConnection = roadAhead.RightPlotMarker;
+            LeftConnection = roadBefore.RightPlotMarker;
+            RightConnection = roadAhead.RightPlotMarker;
 
-            roadBefore.RightPlotMarker._rightConnection = _road.RightPlotMarker;
-            roadAhead.RightPlotMarker._leftConnection = _road.RightPlotMarker;
+            roadBefore.RightPlotMarker.RightConnection = _road.RightPlotMarker;
+            roadAhead.RightPlotMarker.LeftConnection = _road.RightPlotMarker;
         }
 
         ShowConnectionRays();
@@ -140,26 +140,26 @@ public class PlotMarker : MonoBehaviour
         {
             if (IsValidConnection(intersection))
             {
-                _rightConnection = intersection.LeftPlotMarker;
-                intersection.LeftPlotMarker._leftConnection = _road.LeftPlotMarker;
+                RightConnection = intersection.LeftPlotMarker;
+                intersection.LeftPlotMarker.LeftConnection = _road.LeftPlotMarker;
             }
             else if (intersectionTailTail != null && intersectionTailTail.CanMakePlots && intersectionTailTail != _road)
             {
-                _rightConnection = intersectionTailTail.RightPlotMarker;
-                intersectionTailTail.RightPlotMarker._leftConnection = _road.LeftPlotMarker;
+                RightConnection = intersectionTailTail.RightPlotMarker;
+                intersectionTailTail.RightPlotMarker.LeftConnection = _road.LeftPlotMarker;
             }
         }
         else
         {
             if (IsValidConnection(intersection))
             {
-                _leftConnection = intersection.RightPlotMarker;
-                intersection.RightPlotMarker._rightConnection = _road.RightPlotMarker;
+                LeftConnection = intersection.RightPlotMarker;
+                intersection.RightPlotMarker.RightConnection = _road.RightPlotMarker;
             }
             else if (intersectionTailTail != null && intersectionTailTail.CanMakePlots && intersectionTailTail != _road)
             {
-                _leftConnection = intersectionTailTail.LeftPlotMarker;
-                intersectionTailTail.LeftPlotMarker._rightConnection = _road.RightPlotMarker;
+                LeftConnection = intersectionTailTail.LeftPlotMarker;
+                intersectionTailTail.LeftPlotMarker.RightConnection = _road.RightPlotMarker;
             }
         }
 
@@ -180,41 +180,41 @@ public class PlotMarker : MonoBehaviour
 
         if (_isLeftPlotMarker)
         {
-            if (_leftConnection == null)
+            if (LeftConnection == null)
             {
                 if (IsValidConnection(roadAhead))
                 {
-                    _leftConnection = roadAhead.LeftPlotMarker;
-                    roadAhead.LeftPlotMarker._rightConnection = _road.LeftPlotMarker;
+                    LeftConnection = roadAhead.LeftPlotMarker;
+                    roadAhead.LeftPlotMarker.RightConnection = _road.LeftPlotMarker;
                 }
             }
 
-            if (_rightConnection == null)
+            if (RightConnection == null)
             {
                 if (IsValidConnection(roadBefore))
                 {
-                    _rightConnection = roadBefore.LeftPlotMarker;
-                    roadBefore.LeftPlotMarker._leftConnection = _road.LeftPlotMarker;
+                    RightConnection = roadBefore.LeftPlotMarker;
+                    roadBefore.LeftPlotMarker.LeftConnection = _road.LeftPlotMarker;
                 }
             }
         }
         else
         {
-            if (_leftConnection == null)
+            if (LeftConnection == null)
             {
                 if (IsValidConnection(roadBefore))
                 {
-                    _leftConnection = roadBefore.RightPlotMarker;
-                    roadBefore.RightPlotMarker._rightConnection = _road.RightPlotMarker;
+                    LeftConnection = roadBefore.RightPlotMarker;
+                    roadBefore.RightPlotMarker.RightConnection = _road.RightPlotMarker;
                 }
             }
 
-            if (_rightConnection == null)
+            if (RightConnection == null)
             {
                 if (IsValidConnection(roadAhead))
                 {
-                    _rightConnection = roadAhead.RightPlotMarker;
-                    roadAhead.RightPlotMarker._leftConnection = _road.RightPlotMarker;
+                    RightConnection = roadAhead.RightPlotMarker;
+                    roadAhead.RightPlotMarker.LeftConnection = _road.RightPlotMarker;
                 }
             }
         }
@@ -241,12 +241,12 @@ public class PlotMarker : MonoBehaviour
         else
             marker = roadHit.RightPlotMarker;
 
-        if (marker._plotConnection != null) return;
+        if (marker.ForwardConnection != null) return;
 
         bool cycleFound = false;
         bool cycleEncountered = false;
 
-        PlotMarker dummy = marker._leftConnection;
+        PlotMarker dummy = marker.LeftConnection;
 
         while (dummy != null)
         {
@@ -258,21 +258,21 @@ public class PlotMarker : MonoBehaviour
                 break;
             }
 
-            if (dummy._plotConnection == null)
-                dummy = dummy._leftConnection;
+            if (dummy.ForwardConnection == null)
+                dummy = dummy.LeftConnection;
             else
             {
                 if (cycleEncountered) break;
                 if (dummy.IsLeftCycle != IsLeftCycle) break;
 
-                dummy = dummy._plotConnection._leftConnection;
+                dummy = dummy.ForwardConnection.LeftConnection;
                 cycleEncountered = true;
             }
         }
         
         if (!cycleFound)
         {
-            dummy = marker._rightConnection;
+            dummy = marker.RightConnection;
             cycleEncountered = false;
 
             while (dummy != null)
@@ -284,14 +284,14 @@ public class PlotMarker : MonoBehaviour
                     break;
                 }
 
-                if (dummy._plotConnection == null)
-                    dummy = dummy._rightConnection;
+                if (dummy.ForwardConnection == null)
+                    dummy = dummy.RightConnection;
                 else
                 {
                     if (cycleEncountered) break;
                     if (dummy.IsLeftCycle != IsLeftCycle) break;
 
-                    dummy = dummy._plotConnection._rightConnection;
+                    dummy = dummy.ForwardConnection.RightConnection;
                     cycleEncountered = true;
                 }
             }
@@ -299,8 +299,8 @@ public class PlotMarker : MonoBehaviour
 
         if (!cycleFound) return;
 
-        _plotConnection = marker;
-        marker._plotConnection = this;
+        ForwardConnection = marker;
+        marker.ForwardConnection = this;
         marker.IsLeftCycle = !IsLeftCycle;
 
         var plotContainer = new List<PlotMarker>();
@@ -340,14 +340,14 @@ public class PlotMarker : MonoBehaviour
 
     private bool StillHasConnectionsToMake()
     {
-        return _leftConnection == null || _rightConnection == null;
+        return LeftConnection == null || RightConnection == null;
     }
 
     private bool IsNextToPlot()
     {
-        if (_leftConnection != null && _leftConnection._plotConnection != null) return true;
-        if (_rightConnection != null && _rightConnection._plotConnection != null) return true;
-        if (_plotConnection != null) return true;
+        if (LeftConnection != null && LeftConnection.ForwardConnection != null) return true;
+        if (RightConnection != null && RightConnection.ForwardConnection != null) return true;
+        if (ForwardConnection != null) return true;
 
         return false;
     }
@@ -367,38 +367,23 @@ public class PlotMarker : MonoBehaviour
         return false;
     }
 
-    public PlotMarker GetLeftConnection()
-    {
-        return _leftConnection;
-    }
-
-    public PlotMarker GetRightConnection()
-    {
-        return _rightConnection;
-    }
-
-    public PlotMarker GetPlotConnection()
-    {
-        return _plotConnection;
-    }
-
     private void DrawDebugRays()
     {
         if (_showConnectionRays)
         {
-            if (_leftConnection != null)
-                Debug.DrawRay(transform.position, Vector3.Normalize(_leftConnection.transform.position - transform.position) * Vector3.Distance(transform.position, _leftConnection.transform.position), Color.blue);
+            if (LeftConnection != null)
+                Debug.DrawRay(transform.position, Vector3.Normalize(LeftConnection.transform.position - transform.position) * Vector3.Distance(transform.position, LeftConnection.transform.position), Color.blue);
 
-            if (_rightConnection != null)
-                Debug.DrawRay(transform.position, Vector3.Normalize(_rightConnection.transform.position - transform.position) * Vector3.Distance(transform.position, _rightConnection.transform.position), Color.blue);
+            if (RightConnection != null)
+                Debug.DrawRay(transform.position, Vector3.Normalize(RightConnection.transform.position - transform.position) * Vector3.Distance(transform.position, RightConnection.transform.position), Color.blue);
 
             if (_isLeftPlotMarker)
                 Debug.DrawRay(transform.position, _forwardDirection * 10, Color.green);
             else
                 Debug.DrawRay(transform.position, _forwardDirection * 10, Color.green);
 
-            if (_plotConnection != null)
-                Debug.DrawRay(transform.position, Vector3.Normalize(_plotConnection.transform.position - transform.position) * Vector3.Distance(transform.position, _plotConnection.transform.position), Color.magenta);
+            if (ForwardConnection != null)
+                Debug.DrawRay(transform.position, Vector3.Normalize(ForwardConnection.transform.position - transform.position) * Vector3.Distance(transform.position, ForwardConnection.transform.position), Color.magenta);
         }
         else
         {
@@ -409,7 +394,7 @@ public class PlotMarker : MonoBehaviour
         }
     }
 
-    private void ShowConnectionRays()
+    public void ShowConnectionRays()
     {
         _showConnectionRays = true;
 
