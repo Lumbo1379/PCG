@@ -43,6 +43,8 @@ public class CreateOOB
 
             AABBRectangle.Type = BoxType.AABB;
 
+            AABBRectangle.Area = (AABBRectangle.Extents[0] * 2) * (AABBRectangle.Extents[1] * 2);
+
             AABBRectangle.SetCorners();
 
             return AABBRectangle;
