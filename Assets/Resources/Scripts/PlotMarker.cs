@@ -18,6 +18,8 @@ public class PlotMarker : MonoBehaviour
     public PlotMarker LeftConnection { get; set; }
     public PlotMarker RightConnection { get; set; }
     public PlotMarker ForwardConnection { get; set; }
+    public bool IsParcelMarker { get; set; }
+    public bool PossibleConnectionError { get; set; }
 
     private RoadPiece _road;
     private bool _isInitialised;

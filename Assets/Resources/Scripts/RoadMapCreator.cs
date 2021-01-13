@@ -7,6 +7,9 @@ using UnityEngine.Rendering;
 
 public class RoadMapCreator : MonoBehaviour
 {
+    [Header("Controllers", order = -1)]
+    [SerializeField] BuildingCreator _buildingController;
+
     [Header("Perlin Generation", order = 0)]
     [SerializeField] private int _width = 256;
     [SerializeField] private int _length = 256;
@@ -49,7 +52,14 @@ public class RoadMapCreator : MonoBehaviour
     [SerializeField] private BoxType _type;
     [SerializeField] private bool _showBoundingBox = false;
 
-    [Header("Seed", order = 6)]
+    [Header("Debug Dividied Plots", order = 6)]
+    [SerializeField] private bool _debugPlotsFinal = false;
+    [SerializeField] private Color32 _highlightColourFinal = new Color32(0, 255, 0, 255);
+    [SerializeField] private int _numberOfDividedPlots;
+    [SerializeField] private int _plotIndexToHighlightFinal = 0;
+    [SerializeField] private bool _highlightPlotFinal = false;
+
+    [Header("Seed", order = 7)]
     [SerializeField] private bool _useSpecificSeed;
     [SerializeField] private int _seedX;
     [SerializeField] private int _seedY;
@@ -73,9 +83,12 @@ public class RoadMapCreator : MonoBehaviour
     private bool _plotContainersMapped;
 
     private int _lastHighlightedPlotIndex;
+    private int _lastHighlightedPlotIndexFinal;
     private Color32 _originalPlotColour;
 
     private GameObject[] _previousBoundingBox;
+
+    private List<List<PlotMarker>> _finalDividedPlots;
 
     private void Awake()
     {
@@ -106,15 +119,20 @@ public class RoadMapCreator : MonoBehaviour
         _debugPlots = false;
         _debugBoundingBox = false;
         _highlightPlot = false;
+        _highlightPlotFinal = false;
         _showBoundingBox = false;
         _plotIndexToHighlight = 0;
+        _plotIndexToHighlightFinal = 0;
         _lastHighlightedPlotIndex = -1;
+        _lastHighlightedPlotIndexFinal = -1;
         _originalPlotColour = _plotPiece.GetComponent<MeshRenderer>().sharedMaterial.color;
 
         _plotContainers = new List<List<PlotMarker>>();
         _plotContainersMapped = false;
 
         NEXTPARCEL = new List<PlotMarker>();
+
+        _finalDividedPlots = new List<List<PlotMarker>>();
     }
 
     private void Start()
@@ -178,6 +196,35 @@ public class RoadMapCreator : MonoBehaviour
             }
         }
 
+        if (_debugPlotsFinal)
+        {
+            _numberOfDividedPlots = _finalDividedPlots.Count;
+
+            if (_highlightPlotFinal)
+            {
+                _highlightPlotFinal = false;
+
+                if (_lastHighlightedPlotIndexFinal != -1)
+                {
+                    foreach (var plot in _finalDividedPlots[_lastHighlightedPlotIndexFinal])
+                    {
+                        var plotMat = plot.GetComponent<MeshRenderer>().material;
+                        plotMat.color = _originalPlotColour;
+                    }
+                }
+
+                if (_plotIndexToHighlightFinal > _numberOfDividedPlots - 1) return;
+
+                foreach (var plot in _finalDividedPlots[_plotIndexToHighlightFinal])
+                {
+                    var plotMat = plot.GetComponent<MeshRenderer>().material;
+                    plotMat.color = _highlightColour;
+                }
+
+                _lastHighlightedPlotIndexFinal = _plotIndexToHighlightFinal;
+            }
+        }
+
         if (_debugBoundingBox)
         {
             _debugPlots = true;
@@ -233,9 +280,15 @@ public class RoadMapCreator : MonoBehaviour
                 _previousBoundingBox[4] = corner4;
 
                 if (NEXTPARCEL.Count == 0)
-                    ParcelPlot(_plotContainers[_plotIndexToHighlightBB], _plotContainers[_plotIndexToHighlightBB][0].IsLeftCycle);
+                {
+                    ParcelPlot(_plotContainers[_plotIndexToHighlightBB], _plotContainers[_plotIndexToHighlightBB][0].IsLeftCycle, _plotContainers[_plotIndexToHighlightBB]);
+
+                    //ValidateConnections(_plotContainers[_plotIndexToHighlightBB]);
+                }
                 else
-                    ParcelPlot(NEXTPARCEL, _plotContainers[_plotIndexToHighlightBB][0].IsLeftCycle);
+                {
+                    ParcelPlot(NEXTPARCEL, _plotContainers[_plotIndexToHighlightBB][0].IsLeftCycle, _plotContainers[_plotIndexToHighlightBB]);
+                }
             }
 
             if (_previousBoundingBox != null && _previousBoundingBox.Length != 0)
@@ -294,7 +347,9 @@ public class RoadMapCreator : MonoBehaviour
 
             _plotContainersMapped = true;
 
-            //DividePlots();
+            DividePlots();
+
+            _buildingController.CreateBuildings(_finalDividedPlots);
         }
     }
 
@@ -851,16 +906,20 @@ public class RoadMapCreator : MonoBehaviour
     {
         foreach (var plot in _plotContainers)
         {
-            ParcelPlot(plot, plot[0].IsLeftCycle);
+            ParcelPlot(plot, plot[0].IsLeftCycle, plot);
+
+            //ValidateConnections(plot);
         }
     }
 
-    private void ParcelPlot(List<PlotMarker> plot, bool isLeftCycle)
+    private void ParcelPlot(List<PlotMarker> plot, bool isLeftCycle, List<PlotMarker> originalPlotList)
     {
         var boundingBox = CreateOOB.GetMinRectangle(plot, isLeftCycle);
 
         if (boundingBox.Area < _minPlotArea)
         {
+            _finalDividedPlots.Add(plot);
+
             Debug.Log("Minimum area reached");
             return;
         }
@@ -943,70 +1002,11 @@ public class RoadMapCreator : MonoBehaviour
         var pp1Marker = pp1.GetComponent<PlotMarker>();
         var pp2Marker = pp2.GetComponent<PlotMarker>();
 
+        pp1Marker.IsParcelMarker = true;
+        pp2Marker.IsParcelMarker = true;
+
         InsertPlot(plot[i1AIndex], plot[i1BIndex], pp1Marker, isLeftCycle);
         InsertPlot(plot[i2AIndex], plot[i2BIndex], pp2Marker, isLeftCycle);
-
-        //if (isLeftCycle)
-        //{
-        //    if (plot[i1AIndex].ForwardConnection != plot[i1BIndex])
-        //    {
-        //        plot[i1AIndex].LeftConnection = pp1Marker;
-        //        plot[i1BIndex].RightConnection = pp1Marker;
-        //    }
-        //    else
-        //    {
-        //        plot[i1AIndex].ForwardConnection = pp1Marker;
-        //        plot[i1BIndex].ForwardConnection = pp1Marker;
-        //    }
-
-        //    pp1Marker.RightConnection = plot[i1AIndex];
-        //    pp1Marker.LeftConnection = plot[i1BIndex];
-
-        //    if (plot[i2AIndex].ForwardConnection != plot[i2BIndex])
-        //    {
-        //        plot[i2AIndex].LeftConnection = pp2Marker;
-        //        plot[i2BIndex].RightConnection = pp2Marker;
-        //    }
-        //    else
-        //    {
-        //        plot[i2AIndex].ForwardConnection = pp2Marker;
-        //        plot[i2BIndex].ForwardConnection = pp2Marker;
-        //    }
-
-        //    pp2Marker.RightConnection = plot[i2AIndex];
-        //    pp2Marker.LeftConnection = plot[i2BIndex];
-        //}
-        //else
-        //{
-
-        //    if (plot[i1AIndex].ForwardConnection != plot[i1BIndex])
-        //    {
-        //        plot[i1AIndex].RightConnection = pp1Marker;
-        //        plot[i1BIndex].LeftConnection = pp1Marker;
-        //    }
-        //    else
-        //    {
-        //        plot[i1AIndex].ForwardConnection = pp1Marker;
-        //        plot[i1BIndex].ForwardConnection = pp1Marker;
-        //    }
-
-        //    pp1Marker.LeftConnection = plot[i1AIndex];
-        //    pp1Marker.RightConnection = plot[i1BIndex];
-
-        //    if (plot[i2AIndex].ForwardConnection != plot[i2BIndex])
-        //    {
-        //        plot[i2AIndex].RightConnection = pp2Marker;
-        //        plot[i2BIndex].LeftConnection = pp2Marker;
-        //    }
-        //    else
-        //    {
-        //        plot[i2AIndex].ForwardConnection = pp2Marker;
-        //        plot[i2BIndex].ForwardConnection = pp2Marker;
-        //    }
-
-        //    pp2Marker.LeftConnection = plot[i2AIndex];
-        //    pp2Marker.RightConnection = plot[i2BIndex];
-        //}
 
         pp1Marker.ForwardConnection = pp2Marker;
         pp2Marker.ForwardConnection = pp1Marker;
@@ -1014,67 +1014,67 @@ public class RoadMapCreator : MonoBehaviour
         pp1Marker.ShowConnectionRays();
         pp2Marker.ShowConnectionRays();
 
-        {
-            Destroy(_previousBoundingBox[0]);
-            Destroy(_previousBoundingBox[1]);
-            Destroy(_previousBoundingBox[2]);
-            Destroy(_previousBoundingBox[3]);
-            Destroy(_previousBoundingBox[4]);
+        //{
+        //    Destroy(_previousBoundingBox[0]);
+        //    Destroy(_previousBoundingBox[1]);
+        //    Destroy(_previousBoundingBox[2]);
+        //    Destroy(_previousBoundingBox[3]);
+        //    Destroy(_previousBoundingBox[4]);
 
-            var centre = Instantiate(_plotPiece);
-            var centreMat = centre.GetComponent<MeshRenderer>().material;
-            centreMat.color = _highlightBoundingBoxColour;
-            centre.transform.position = new Vector3(boundingBox.Centre.x, -1, boundingBox.Centre.y);
-            _previousBoundingBox[0] = centre;
+        //    var centre = Instantiate(_plotPiece);
+        //    var centreMat = centre.GetComponent<MeshRenderer>().material;
+        //    centreMat.color = _highlightBoundingBoxColour;
+        //    centre.transform.position = new Vector3(boundingBox.Centre.x, -1, boundingBox.Centre.y);
+        //    _previousBoundingBox[0] = centre;
 
-            var corner1 = Instantiate(_plotPiece);
-            var corner1Mat = corner1.GetComponent<MeshRenderer>().material;
-            corner1Mat.color = _highlightBoundingBoxColour;
-            corner1.transform.position = new Vector3(boundingBox.Corners[0].x, -1, boundingBox.Corners[0].y);
-            _previousBoundingBox[1] = corner1;
+        //    var corner1 = Instantiate(_plotPiece);
+        //    var corner1Mat = corner1.GetComponent<MeshRenderer>().material;
+        //    corner1Mat.color = _highlightBoundingBoxColour;
+        //    corner1.transform.position = new Vector3(boundingBox.Corners[0].x, -1, boundingBox.Corners[0].y);
+        //    _previousBoundingBox[1] = corner1;
 
-            var corner2 = Instantiate(_plotPiece);
-            var corner2Mat = corner2.GetComponent<MeshRenderer>().material;
-            corner2Mat.color = _highlightBoundingBoxColour;
-            corner2.transform.position = new Vector3(boundingBox.Corners[1].x, -1, boundingBox.Corners[1].y);
-            _previousBoundingBox[2] = corner2;
+        //    var corner2 = Instantiate(_plotPiece);
+        //    var corner2Mat = corner2.GetComponent<MeshRenderer>().material;
+        //    corner2Mat.color = _highlightBoundingBoxColour;
+        //    corner2.transform.position = new Vector3(boundingBox.Corners[1].x, -1, boundingBox.Corners[1].y);
+        //    _previousBoundingBox[2] = corner2;
 
-            var corner3 = Instantiate(_plotPiece);
-            var corner3Mat = corner3.GetComponent<MeshRenderer>().material;
-            corner3Mat.color = _highlightBoundingBoxColour;
-            corner3.transform.position = new Vector3(boundingBox.Corners[2].x, -1, boundingBox.Corners[2].y);
-            _previousBoundingBox[3] = corner3;
+        //    var corner3 = Instantiate(_plotPiece);
+        //    var corner3Mat = corner3.GetComponent<MeshRenderer>().material;
+        //    corner3Mat.color = _highlightBoundingBoxColour;
+        //    corner3.transform.position = new Vector3(boundingBox.Corners[2].x, -1, boundingBox.Corners[2].y);
+        //    _previousBoundingBox[3] = corner3;
 
-            var corner4 = Instantiate(_plotPiece);
-            var corner4Mat = corner4.GetComponent<MeshRenderer>().material;
-            corner4Mat.color = _highlightBoundingBoxColour;
-            corner4.transform.position = new Vector3(boundingBox.Corners[3].x, -1, boundingBox.Corners[3].y);
-            _previousBoundingBox[4] = corner4;
+        //    var corner4 = Instantiate(_plotPiece);
+        //    var corner4Mat = corner4.GetComponent<MeshRenderer>().material;
+        //    corner4Mat.color = _highlightBoundingBoxColour;
+        //    corner4.transform.position = new Vector3(boundingBox.Corners[3].x, -1, boundingBox.Corners[3].y);
+        //    _previousBoundingBox[4] = corner4;
 
-            var b1p = Instantiate(_plotPiece);
-            b1p.transform.position = new Vector3(b1.x, 0, b1.y);
+        //    var b1p = Instantiate(_plotPiece);
+        //    b1p.transform.position = new Vector3(b1.x, 0, b1.y);
 
-            var b2p = Instantiate(_plotPiece);
-            b2p.transform.position = new Vector3(b2.x, 0, b2.y);
+        //    var b2p = Instantiate(_plotPiece);
+        //    b2p.transform.position = new Vector3(b2.x, 0, b2.y);
 
-            for (int p = 0; p < PLOTS.Length; p++)
-            {
-                var pm = PLOTS[p].GetComponent<MeshRenderer>();
-                pm.material.color = new Color32(255, 0, 0, 255); ;
-            }
+        //    for (int p = 0; p < PLOTS.Length; p++)
+        //    {
+        //        var pm = PLOTS[p].GetComponent<MeshRenderer>();
+        //        pm.material.color = new Color32(255, 0, 0, 255); ;
+        //    }
 
-            PLOTS = new PlotMarker[plot.Count];
+        //    PLOTS = new PlotMarker[plot.Count];
 
-            for (int p = 0; p < plot.Count; p++)
-            {
-                PLOTS[p] = plot[p];
+        //    for (int p = 0; p < plot.Count; p++)
+        //    {
+        //        PLOTS[p] = plot[p];
 
-                var pm = plot[p].GetComponent<MeshRenderer>();
-                pm.material.color = new Color32(0, 255, 0, 255);
-            }
+        //        var pm = plot[p].GetComponent<MeshRenderer>();
+        //        pm.material.color = new Color32(0, 255, 0, 255);
+        //    }
 
-            Debug.Log($"i1a: {i1AIndex} | i1b: {i1BIndex} | i2a: {i2AIndex} | i2b: {i2BIndex} | numberOfIntersection: {numberOfIntersections} | plotsInParcel: {plot.Count}");
-        }
+        //    Debug.Log($"i1a: {i1AIndex} | i1b: {i1BIndex} | i2a: {i2AIndex} | i2b: {i2BIndex} | numberOfIntersection: {numberOfIntersections} | plotsInParcel: {plot.Count}");
+        //}
 
 
         var parcel1 = new List<PlotMarker>();
@@ -1098,11 +1098,47 @@ public class RoadMapCreator : MonoBehaviour
         parcel2.AddRange(plot.GetRange(i1BIndex, i2AIndex - i1BIndex + 1));
         parcel2.Add(pp2Marker);
 
-        //NEXTPARCEL = parcel2;
+        //NEXTPARCEL = parcel1;
 
-        ParcelPlot(parcel1, isLeftCycle);
-        ParcelPlot(parcel2, isLeftCycle);
+        ParcelPlot(parcel1, isLeftCycle, originalPlotList);
+        ParcelPlot(parcel2, isLeftCycle, originalPlotList);
+
+        originalPlotList.Add(pp1Marker);
+        originalPlotList.Add(pp2Marker);
     }
+
+    //private void FindPlotToInsert(int a, int b, List<PlotMarker> plot)
+    //{
+    //    PlotMarker aMarker = plot[a];
+    //    PlotMarker bMarker = plot[b];
+    //    PlotMarker sharedConnection;
+
+    //    if (aMarker.LeftConnection == bMarker.LeftConnection && aMarker.LeftConnection.IsParcelMarker)
+    //        sharedConnection = aMarker.LeftConnection;
+    //    else if (aMarker.LeftConnection == bMarker.RightConnection && aMarker.LeftConnection.IsParcelMarker)
+    //        sharedConnection = aMarker.LeftConnection;
+    //    else if (aMarker.LeftConnection == bMarker.ForwardConnection && aMarker.LeftConnection.IsParcelMarker)
+    //        sharedConnection = aMarker.LeftConnection;
+    //    else if (aMarker.RightConnection == bMarker.LeftConnection && aMarker.RightConnection.IsParcelMarker)
+    //        sharedConnection = aMarker.RightConnection;
+    //    else if (aMarker.RightConnection == bMarker.RightConnection && aMarker.RightConnection.IsParcelMarker)
+    //        sharedConnection = aMarker.RightConnection;
+    //    else if (aMarker.RightConnection == bMarker.ForwardConnection && aMarker.RightConnection.IsParcelMarker)
+    //        sharedConnection = aMarker.RightConnection;
+    //    else if (aMarker.ForwardConnection == bMarker.LeftConnection && aMarker.ForwardConnection.IsParcelMarker)
+    //        sharedConnection = aMarker.ForwardConnection;
+    //    else if (aMarker.ForwardConnection == bMarker.RightConnection && aMarker.ForwardConnection.IsParcelMarker)
+    //        sharedConnection = aMarker.ForwardConnection;
+    //    else if (aMarker.ForwardConnection == bMarker.ForwardConnection && aMarker.ForwardConnection.IsParcelMarker)
+    //        sharedConnection = aMarker.ForwardConnection;
+    //    else
+    //    {
+    //        Debug.LogError("Something has gone wrong");
+    //        return;
+    //    }
+
+    //    plot.Insert(a + 1, sharedConnection);
+    //}
 
     private void InsertPlot(PlotMarker a, PlotMarker b, PlotMarker newPlot, bool isLeftCycle)
     {
@@ -1135,6 +1171,8 @@ public class RoadMapCreator : MonoBehaviour
         }
         else
         {
+            newPlot.PossibleConnectionError = true;
+
             a.ForwardConnection = newPlot;
 
             if (isLeftCycle)
@@ -1155,6 +1193,8 @@ public class RoadMapCreator : MonoBehaviour
         }
         else
         {
+            newPlot.PossibleConnectionError = true;
+
             b.ForwardConnection = newPlot;
 
             if (isLeftCycle)
@@ -1162,6 +1202,50 @@ public class RoadMapCreator : MonoBehaviour
             else
                 newPlot.RightConnection = b;
         }
+    }
+
+    //private bool ValidateConnection(PlotMarker a, PlotMarker b)
+    //{
+    //    return a.LeftConnection == b || a.RightConnection == b || a.ForwardConnection == b;
+    //}
+
+    //private void ValidateConnections(List<PlotMarker> plot)
+    //{
+    //    foreach (var plotMarker in plot)
+    //    {
+    //        bool leftValid = true;
+    //        bool rightValid = true;
+    //        bool forwardValid = true;
+
+    //        var left = plotMarker.LeftConnection;
+    //        var right = plotMarker.RightConnection;
+    //        var forward = plotMarker.ForwardConnection;
+
+    //        if (left != null)
+    //            leftValid = DoesHoldAConnection(plotMarker, left);
+
+    //        if (right != null)
+    //            rightValid = DoesHoldAConnection(plotMarker, right);
+
+    //        if (forward != null)
+    //            forwardValid = DoesHoldAConnection(plotMarker, forward);
+
+    //        Debug.Log($"L: {leftValid} | R: {rightValid} | F: {forwardValid}  | error: {plotMarker.PossibleConnectionError}");
+
+    //        if (!leftValid)
+    //            plotMarker.LeftConnection = null;
+
+    //        if (!rightValid)
+    //            plotMarker.RightConnection = null;
+
+    //        if (!forwardValid)
+    //            plotMarker.ForwardConnection = null;
+    //    }
+    //}
+
+    private bool DoesHoldAConnection(PlotMarker a, PlotMarker b)
+    {
+        return b.LeftConnection == a || b.RightConnection == a || b.ForwardConnection == a;
     }
 
     enum PlotConnection
