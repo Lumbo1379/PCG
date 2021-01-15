@@ -349,7 +349,7 @@ public class RoadMapCreator : MonoBehaviour
 
             DividePlots();
 
-            _buildingController.CreateBuildings(_finalDividedPlots);
+            _buildingController.CreateBuildings(_finalDividedPlots, new Vector3(-_width / 2 * 20, 0, _length / 2 * 45));
         }
     }
 
@@ -1171,8 +1171,6 @@ public class RoadMapCreator : MonoBehaviour
         }
         else
         {
-            newPlot.PossibleConnectionError = true;
-
             a.ForwardConnection = newPlot;
 
             if (isLeftCycle)
@@ -1193,8 +1191,6 @@ public class RoadMapCreator : MonoBehaviour
         }
         else
         {
-            newPlot.PossibleConnectionError = true;
-
             b.ForwardConnection = newPlot;
 
             if (isLeftCycle)

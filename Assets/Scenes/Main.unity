@@ -646,7 +646,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0d1113f9f397fd4aae9ee0a946d6aed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rectangleBlock: {fileID: 0}
+  _rectangleBlock: {fileID: 7601763600799872774, guid: 456872eceadbb57429f30393e6268583,
+    type: 3}
+  _mask:
+    serializedVersion: 2
+    m_Bits: 512
+  _centre: {x: 0, y: 0, z: 0}
+  _zone1MinDistanceToCentre: 150
+  _zone1MaxHeight: 21
+  _zone1MinHeight: 15
+  _zone2MaxHeight: 10
+  _zone2MinHeight: 6
 --- !u!4 &839469021
 Transform:
   m_ObjectHideFlags: 0

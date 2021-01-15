@@ -19,9 +19,9 @@ public class PlotMarker : MonoBehaviour
     public PlotMarker RightConnection { get; set; }
     public PlotMarker ForwardConnection { get; set; }
     public bool IsParcelMarker { get; set; }
-    public bool PossibleConnectionError { get; set; }
 
-    private RoadPiece _road;
+    public RoadPiece Road { get; set; }
+
     private bool _isInitialised;
     private bool _isLeftPlotMarker;
     private Vector3 _forwardDirection;
@@ -43,7 +43,7 @@ public class PlotMarker : MonoBehaviour
 
     public void Initialise(RoadPiece road, bool isLeftPlotMarker, List<List<PlotMarker>> plotContainers, RoadMapCreator roadMapCreator)
     {
-        _road = road;
+        Road = road;
         _isLeftPlotMarker = isLeftPlotMarker;
         _plotContainers = plotContainers;
         _roadMapCreator = roadMapCreator;
@@ -63,7 +63,7 @@ public class PlotMarker : MonoBehaviour
         {
             if (CanMakeInitialConnections())
                 MakeInitialConnections();
-            else if (_road.HeadConnection != null && !_road.HeadConnection.GetComponent<RoadPiece>().CanMakePlots)
+            else if (Road.HeadConnection != null && !Road.HeadConnection.GetComponent<RoadPiece>().CanMakePlots)
                 MakeIntersectionConnections();
 
             if (!IsEndPiece() && StillHasConnectionsToMake())
@@ -101,24 +101,24 @@ public class PlotMarker : MonoBehaviour
 
     private void MakeInitialConnections()
     {
-        var roadBefore = _road.HeadConnection.GetComponent<RoadPiece>();
-        var roadAhead = _road.TailConnection.GetComponent<RoadPiece>();
+        var roadBefore = Road.HeadConnection.GetComponent<RoadPiece>();
+        var roadAhead = Road.TailConnection.GetComponent<RoadPiece>();
 
         if (_isLeftPlotMarker)
         {
             LeftConnection = roadAhead.LeftPlotMarker;
             RightConnection = roadBefore.LeftPlotMarker;
 
-            roadAhead.LeftPlotMarker.RightConnection = _road.LeftPlotMarker;
-            roadBefore.LeftPlotMarker.LeftConnection = _road.LeftPlotMarker;
+            roadAhead.LeftPlotMarker.RightConnection = Road.LeftPlotMarker;
+            roadBefore.LeftPlotMarker.LeftConnection = Road.LeftPlotMarker;
         }
         else
         {
             LeftConnection = roadBefore.RightPlotMarker;
             RightConnection = roadAhead.RightPlotMarker;
 
-            roadBefore.RightPlotMarker.RightConnection = _road.RightPlotMarker;
-            roadAhead.RightPlotMarker.LeftConnection = _road.RightPlotMarker;
+            roadBefore.RightPlotMarker.RightConnection = Road.RightPlotMarker;
+            roadAhead.RightPlotMarker.LeftConnection = Road.RightPlotMarker;
         }
 
         ShowConnectionRays();
@@ -126,7 +126,7 @@ public class PlotMarker : MonoBehaviour
 
     private void MakeIntersectionConnections()
     {
-        var intersection = _road.HeadConnection.GetComponent<RoadPiece>();
+        var intersection = Road.HeadConnection.GetComponent<RoadPiece>();
 
         while (intersection != null && intersection.HeadConnection != null && !intersection.CanMakePlots)
             intersection = intersection.HeadConnection.GetComponent<RoadPiece>();
@@ -143,12 +143,12 @@ public class PlotMarker : MonoBehaviour
             if (IsValidConnection(intersection))
             {
                 RightConnection = intersection.LeftPlotMarker;
-                intersection.LeftPlotMarker.LeftConnection = _road.LeftPlotMarker;
+                intersection.LeftPlotMarker.LeftConnection = Road.LeftPlotMarker;
             }
-            else if (intersectionTailTail != null && intersectionTailTail.CanMakePlots && intersectionTailTail != _road)
+            else if (intersectionTailTail != null && intersectionTailTail.CanMakePlots && intersectionTailTail != Road)
             {
                 RightConnection = intersectionTailTail.RightPlotMarker;
-                intersectionTailTail.RightPlotMarker.LeftConnection = _road.LeftPlotMarker;
+                intersectionTailTail.RightPlotMarker.LeftConnection = Road.LeftPlotMarker;
             }
         }
         else
@@ -156,12 +156,12 @@ public class PlotMarker : MonoBehaviour
             if (IsValidConnection(intersection))
             {
                 LeftConnection = intersection.RightPlotMarker;
-                intersection.RightPlotMarker.RightConnection = _road.RightPlotMarker;
+                intersection.RightPlotMarker.RightConnection = Road.RightPlotMarker;
             }
-            else if (intersectionTailTail != null && intersectionTailTail.CanMakePlots && intersectionTailTail != _road)
+            else if (intersectionTailTail != null && intersectionTailTail.CanMakePlots && intersectionTailTail != Road)
             {
                 LeftConnection = intersectionTailTail.LeftPlotMarker;
-                intersectionTailTail.LeftPlotMarker.RightConnection = _road.RightPlotMarker;
+                intersectionTailTail.LeftPlotMarker.RightConnection = Road.RightPlotMarker;
             }
         }
 
@@ -170,12 +170,12 @@ public class PlotMarker : MonoBehaviour
 
     private void TrySearchForNewConnections()
     {
-        var roadBefore = _road.HeadConnection.GetComponent<RoadPiece>();
+        var roadBefore = Road.HeadConnection.GetComponent<RoadPiece>();
 
         while (roadBefore != null && roadBefore.HeadConnection != null && !roadBefore.CanMakePlots)
             roadBefore = roadBefore.HeadConnection.GetComponent<RoadPiece>();
 
-        var roadAhead = _road.TailConnection.GetComponent<RoadPiece>();
+        var roadAhead = Road.TailConnection.GetComponent<RoadPiece>();
 
         while (roadAhead != null && roadAhead.TailConnection != null && !roadAhead.CanMakePlots)
             roadAhead = roadAhead.TailConnection.GetComponent<RoadPiece>();
@@ -187,7 +187,7 @@ public class PlotMarker : MonoBehaviour
                 if (IsValidConnection(roadAhead))
                 {
                     LeftConnection = roadAhead.LeftPlotMarker;
-                    roadAhead.LeftPlotMarker.RightConnection = _road.LeftPlotMarker;
+                    roadAhead.LeftPlotMarker.RightConnection = Road.LeftPlotMarker;
                 }
             }
 
@@ -196,7 +196,7 @@ public class PlotMarker : MonoBehaviour
                 if (IsValidConnection(roadBefore))
                 {
                     RightConnection = roadBefore.LeftPlotMarker;
-                    roadBefore.LeftPlotMarker.LeftConnection = _road.LeftPlotMarker;
+                    roadBefore.LeftPlotMarker.LeftConnection = Road.LeftPlotMarker;
                 }
             }
         }
@@ -207,7 +207,7 @@ public class PlotMarker : MonoBehaviour
                 if (IsValidConnection(roadBefore))
                 {
                     LeftConnection = roadBefore.RightPlotMarker;
-                    roadBefore.RightPlotMarker.RightConnection = _road.RightPlotMarker;
+                    roadBefore.RightPlotMarker.RightConnection = Road.RightPlotMarker;
                 }
             }
 
@@ -216,7 +216,7 @@ public class PlotMarker : MonoBehaviour
                 if (IsValidConnection(roadAhead))
                 {
                     RightConnection = roadAhead.RightPlotMarker;
-                    roadAhead.RightPlotMarker.LeftConnection = _road.RightPlotMarker;
+                    roadAhead.RightPlotMarker.LeftConnection = Road.RightPlotMarker;
                 }
             }
         }
@@ -337,7 +337,7 @@ public class PlotMarker : MonoBehaviour
 
     private bool IsEndPiece()
     {
-        return !_road.HeadConnected || !_road.TailConnected;
+        return !Road.HeadConnected || !Road.TailConnected;
     }
 
     private bool StillHasConnectionsToMake()
@@ -356,8 +356,8 @@ public class PlotMarker : MonoBehaviour
 
     private bool CanMakeInitialConnections()
     {
-        if (!_road.HeadConnected || !_road.TailConnected) return false;
-        if (!_road.HeadConnection.GetComponent<RoadPiece>().CanMakePlots || !_road.TailConnection.GetComponent<RoadPiece>().CanMakePlots) return false;
+        if (!Road.HeadConnected || !Road.TailConnected) return false;
+        if (!Road.HeadConnection.GetComponent<RoadPiece>().CanMakePlots || !Road.TailConnection.GetComponent<RoadPiece>().CanMakePlots) return false;
 
         return true;
     }
