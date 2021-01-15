@@ -7,6 +7,8 @@ public class BuildingCreator : MonoBehaviour
 {
     [Header("Building blocks", order = 0)]
     [SerializeField] private GameObject _rectangleBlock;
+    [SerializeField] private GameObject _roof;
+    [SerializeField] private Material _roofMaterial;
     [SerializeField] [Range(0, 1)] private float _maxGapDistanceBetweenBlocks = 0.25f;
     [SerializeField] private LayerMask _mask;
 
@@ -27,9 +29,42 @@ public class BuildingCreator : MonoBehaviour
 
         foreach (var plot in plots)
         {
+            var cleanPlot = RemoveOverlappingMarkers(plot);
+
+            int height = GetHeight(plot[0].transform.position, centre);
+
             if (IsPlotOnRoad(plot))
-                CreateBuildingWithinMarkers(plot, GetHeight(plot[0].transform.position, centre));
+            {
+                var buildingColour = GetRandomColour();
+
+                CreateBuildingWithinMarkers(cleanPlot, height, buildingColour);
+                CreateRoof(cleanPlot, height, buildingColour);
+            }
         }
+    }
+
+    private List<PlotMarker> RemoveOverlappingMarkers(List<PlotMarker> plot)
+    {
+        var positions = new List<Vector3>();
+        var cleanPlot = new List<PlotMarker>();
+
+        foreach (var p in plot)
+        {
+            bool tooClose = false;
+
+            foreach (var pos in positions)
+            {
+                if (Vector3.Distance(p.transform.position, pos) < 1)
+                    tooClose = true;
+            }
+
+            if (tooClose) continue;
+
+            cleanPlot.Add(p);
+            positions.Add(p.transform.position);
+        }
+
+        return cleanPlot;
     }
 
     private bool IsPlotOnRoad(List<PlotMarker> plot)
@@ -58,10 +93,8 @@ public class BuildingCreator : MonoBehaviour
             return Random.Range(_zone2MinHeight, _zone2MaxHeight + 1);
     }
 
-    private void CreateBuildingWithinMarkers(List<PlotMarker> plot, int wallHeight)
+    private void CreateBuildingWithinMarkers(List<PlotMarker> plot, int wallHeight, Color buildingColour)
     {
-        var buildingColour = GetRandomColour();
-
         for (int p = 0; p < plot.Count; p++)
         {
             PlotMarker p1 = plot[p];
@@ -91,8 +124,6 @@ public class BuildingCreator : MonoBehaviour
 
         Vector3 direction = (b.transform.position - a.transform.position).normalized;
 
-        // Check for existing wall
-
         Quaternion rotation = Quaternion.LookRotation(direction);
         rotation *= Quaternion.Euler(0, -90, 90);
 
@@ -104,6 +135,8 @@ public class BuildingCreator : MonoBehaviour
 
         for (int w = 0; w < wallHeight; w++)
         {
+            // Check for existing wall
+
             var hitsFromA = Physics.OverlapSphere(a.transform.position + (direction * BlockLength / 3) + new Vector3(0, BlockWidth * w, 0), 0.1f);
             var hitsFromB = Physics.OverlapSphere(b.transform.position - (direction * BlockLength / 3) + new Vector3(0, BlockWidth * w, 0), 0.1f);
             if (hitsFromA.Length > 0 && hitsFromB.Length > 0) continue;
@@ -142,5 +175,47 @@ public class BuildingCreator : MonoBehaviour
         }
 
         Physics.SyncTransforms();
+    }
+
+    private void CreateRoof(List<PlotMarker> plot, int height, Color buildingColour)
+    {
+        int n = plot.Count;
+
+        Vector2[] vertices2D = new Vector2[n];
+
+        for (int i = 0; i < n; i++)
+        {
+            vertices2D[i] = new Vector2(plot[i].transform.position.x, plot[i].transform.position.z);
+        }
+
+        var triangulator = new Triangulator(vertices2D);
+
+        var indicies = triangulator.Triangulate();
+
+        Vector3[] vertices3D = new Vector3[n];
+
+        for (int k = 0; k < n; k++)
+        {
+            vertices3D[k] = new Vector3(vertices2D[k].x, 0, vertices2D[k].y);
+        }
+
+        var roof = Instantiate(_roof);
+
+        var mesh = new Mesh();
+        mesh.vertices = vertices3D;
+        mesh.uv = vertices2D;
+        mesh.triangles = indicies;
+        mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
+
+        var meshRenderer = roof.AddComponent<MeshRenderer>();
+        var mat = new Material(_roofMaterial);
+        mat.SetColor("TintColour", buildingColour);
+        meshRenderer.material = mat;
+
+        var meshFilter = roof.AddComponent<MeshFilter>();
+        meshFilter.mesh = mesh;
+
+        roof.transform.position = new Vector3(0, height * BlockWidth - BlockWidth / 2 + 0.01f, 0);
     }
 }

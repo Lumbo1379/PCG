@@ -42,7 +42,6 @@ public class RoadMapCreator : MonoBehaviour
     [SerializeField] private bool _isLeftCycle;
     [SerializeField] private int _plotIndexToHighlight = 0;
     [SerializeField] private bool _highlightPlot = false;
-    [SerializeField] private PlotMarker[] PLOTS;
     [SerializeField] private List<PlotMarker> NEXTPARCEL;
 
     [Header("Debug Bounding Box Generation", order = 5)]
@@ -58,6 +57,7 @@ public class RoadMapCreator : MonoBehaviour
     [SerializeField] private int _numberOfDividedPlots;
     [SerializeField] private int _plotIndexToHighlightFinal = 0;
     [SerializeField] private bool _highlightPlotFinal = false;
+    [SerializeField] private PlotMarker[] PLOTS;
 
     [Header("Seed", order = 7)]
     [SerializeField] private bool _useSpecificSeed;
@@ -215,6 +215,8 @@ public class RoadMapCreator : MonoBehaviour
 
                 if (_plotIndexToHighlightFinal > _numberOfDividedPlots - 1) return;
 
+                PLOTS = _finalDividedPlots[_plotIndexToHighlightFinal].ToArray();
+
                 foreach (var plot in _finalDividedPlots[_plotIndexToHighlightFinal])
                 {
                     var plotMat = plot.GetComponent<MeshRenderer>().material;
@@ -282,8 +284,6 @@ public class RoadMapCreator : MonoBehaviour
                 if (NEXTPARCEL.Count == 0)
                 {
                     ParcelPlot(_plotContainers[_plotIndexToHighlightBB], _plotContainers[_plotIndexToHighlightBB][0].IsLeftCycle, _plotContainers[_plotIndexToHighlightBB]);
-
-                    //ValidateConnections(_plotContainers[_plotIndexToHighlightBB]);
                 }
                 else
                 {
