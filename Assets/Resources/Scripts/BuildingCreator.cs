@@ -8,7 +8,10 @@ public class BuildingCreator : MonoBehaviour
     [Header("Building blocks", order = 0)]
     [SerializeField] private GameObject _rectangleBlock;
     [SerializeField] private GameObject _roof;
+    [SerializeField] private GameObject _grass;
     [SerializeField] private Material _roofMaterial;
+    [SerializeField] private Material _grassMaterial;
+    [SerializeField] private int _doorHeight;
     [SerializeField] [Range(0, 1)] private float _maxGapDistanceBetweenBlocks = 0.25f;
     [SerializeField] private LayerMask _mask;
 
@@ -39,6 +42,10 @@ public class BuildingCreator : MonoBehaviour
 
                 CreateBuildingWithinMarkers(cleanPlot, height, buildingColour);
                 CreateRoof(cleanPlot, height, buildingColour);
+            }
+            else
+            {
+                CreateGrassedArea(cleanPlot);
             }
         }
     }
@@ -123,6 +130,7 @@ public class BuildingCreator : MonoBehaviour
         float distance = Vector3.Distance(a.transform.position, b.transform.position);
 
         Vector3 direction = (b.transform.position - a.transform.position).normalized;
+        Vector3 halfWay = a.transform.position + direction * (distance / 2);
 
         Quaternion rotation = Quaternion.LookRotation(direction);
         rotation *= Quaternion.Euler(0, -90, 90);
@@ -132,6 +140,7 @@ public class BuildingCreator : MonoBehaviour
         Vector3 startPoint = a.transform.position;
 
         int blocks = (int)(distance / BlockLength);
+        int staticBlock = blocks;
 
         for (int w = 0; w < wallHeight; w++)
         {
@@ -139,12 +148,19 @@ public class BuildingCreator : MonoBehaviour
 
             var hitsFromA = Physics.OverlapSphere(a.transform.position + (direction * BlockLength / 3) + new Vector3(0, BlockWidth * w, 0), 0.1f);
             var hitsFromB = Physics.OverlapSphere(b.transform.position - (direction * BlockLength / 3) + new Vector3(0, BlockWidth * w, 0), 0.1f);
+            //var hits = Physics.OverlapSphere(halfWay, 1f);
             if (hitsFromA.Length > 0 && hitsFromB.Length > 0) continue;
+            //if (hits.Length > 0) continue;
 
             float gapsDistance = 0;
 
             for (int i = 0; i < blocks; i++)
             {
+                if (w < _doorHeight)
+                {
+                    if (i == staticBlock / 2) continue;
+                }
+
                 if (Random.Range(0, 3 + 1) == 0)
                     gapsDistance += Random.Range(0, _maxGapDistanceBetweenBlocks);
 
@@ -153,6 +169,7 @@ public class BuildingCreator : MonoBehaviour
                 block.transform.rotation = rotation;
                 block.transform.Translate(-(buffer + new Vector3(0, BlockLength, 0) * i + new Vector3(0, gapsDistance, 0)));
                 block.transform.Translate(new Vector3(BlockWidth * w, 0, 0));
+                block.transform.position += block.transform.forward * 0.1f;
 
                 var blockMat = block.GetComponent<MeshRenderer>().material;
                 blockMat.SetColor("TintColour", tint);
@@ -169,12 +186,33 @@ public class BuildingCreator : MonoBehaviour
             Vector3 endBuffer = new Vector3(0, remainingDistance / 2, 0);
             endBlock.transform.Translate(-(endBuffer + new Vector3(0, BlockLength, 0) * blocks + new Vector3(0, gapsDistance, 0)));
             endBlock.transform.Translate(new Vector3(BlockWidth * w, 0, 0));
+            endBlock.transform.position += endBlock.transform.forward * 0.1f;
 
             var endBlockMat = endBlock.GetComponent<MeshRenderer>().material;
             endBlockMat.SetColor("TintColour", tint);
         }
 
         Physics.SyncTransforms();
+    }
+
+    private bool CheckForDoor(PlotMarker p1, PlotMarker p2) // Not used
+    {
+        float distance = Vector3.Distance(p1.transform.position, p2.transform.position);
+        Vector3 direction = (p2.transform.position - p1.transform.position).normalized;
+        Vector3 halfWay = p1.transform.position + direction * (distance / 2);
+        Vector3 normal = new Vector3(-direction.z, 0, direction.x);
+
+        RaycastHit hit;
+
+        if (Physics.SphereCast(halfWay + normal * BlockLength, 1, normal, out hit, 100))
+        {
+            if (hit.transform.tag == "Road")
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void CreateRoof(List<PlotMarker> plot, int height, Color buildingColour)
@@ -217,5 +255,47 @@ public class BuildingCreator : MonoBehaviour
         meshFilter.mesh = mesh;
 
         roof.transform.position = new Vector3(0, height * BlockWidth - BlockWidth / 2 + 0.01f, 0);
+    }
+
+    private void CreateGrassedArea(List<PlotMarker> plot)
+    {
+        int n = plot.Count;
+
+        Vector2[] vertices2D = new Vector2[n];
+
+        for (int i = 0; i < n; i++)
+        {
+            vertices2D[i] = new Vector2(plot[i].transform.position.x, plot[i].transform.position.z);
+        }
+
+        var triangulator = new Triangulator(vertices2D);
+
+        var indicies = triangulator.Triangulate();
+
+        Vector3[] vertices3D = new Vector3[n];
+
+        for (int k = 0; k < n; k++)
+        {
+            vertices3D[k] = new Vector3(vertices2D[k].x, 0, vertices2D[k].y);
+        }
+
+        var grass = Instantiate(_grass);
+
+        var mesh = new Mesh();
+        mesh.vertices = vertices3D;
+        mesh.uv = vertices2D;
+        mesh.triangles = indicies;
+        mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
+
+        var meshRenderer = grass.AddComponent<MeshRenderer>();
+        var mat = new Material(_grassMaterial);
+        meshRenderer.material = mat;
+
+        var meshFilter = grass.AddComponent<MeshFilter>();
+        meshFilter.mesh = mesh;
+
+        var meshCollider = grass.AddComponent<MeshCollider>();
+        meshCollider.sharedMesh = mesh;
     }
 }

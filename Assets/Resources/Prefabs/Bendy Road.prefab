@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4551054901656730914}
   m_Layer: 0
   m_Name: Top Right
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -41,7 +41,7 @@ GameObject:
   - component: {fileID: 1877666936514806120}
   m_Layer: 0
   m_Name: Bottom Right
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -71,7 +71,7 @@ GameObject:
   - component: {fileID: 87560099025468893}
   m_Layer: 0
   m_Name: Bottom Left
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -101,7 +101,7 @@ GameObject:
   - component: {fileID: 5749422034570383083}
   m_Layer: 0
   m_Name: Top Left
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -132,7 +132,7 @@ GameObject:
   - component: {fileID: 8563029634811967848}
   m_Layer: 0
   m_Name: Cube
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -227,9 +227,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8563029634999952243}
+  - component: {fileID: 7573011440998319266}
   m_Layer: 0
   m_Name: Bone.005
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -249,6 +250,19 @@ Transform:
   m_Father: {fileID: 8563029636640923371}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &7573011440998319266
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563029634999952242}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.10009905, y: 0.03365757, z: 5.7449336e+11}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8563029635143779962
 GameObject:
   m_ObjectHideFlags: 0
@@ -258,9 +272,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8563029635143779963}
+  - component: {fileID: 162649620300157717}
   m_Layer: 0
   m_Name: Bone.014
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -280,6 +295,19 @@ Transform:
   m_Father: {fileID: 8563029636446314942}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &162649620300157717
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563029635143779962}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.10009905, y: 0.03365757, z: 5.7449336e+11}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8563029635260208981
 GameObject:
   m_ObjectHideFlags: 0
@@ -289,9 +317,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8563029635260208982}
+  - component: {fileID: 4467115440193438228}
   m_Layer: 0
   m_Name: Bone
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -313,6 +342,19 @@ Transform:
   m_Father: {fileID: 8563029636279694612}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &4467115440193438228
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563029635260208981}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.10009905, y: 0.03365757, z: 5.7449336e+11}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8563029635320906344
 GameObject:
   m_ObjectHideFlags: 0
@@ -322,9 +364,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8563029635320906345}
+  - component: {fileID: 6642418929028805433}
   m_Layer: 0
   m_Name: Bone.015
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -345,6 +388,19 @@ Transform:
   m_Father: {fileID: 8563029636131931096}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &6642418929028805433
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563029635320906344}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.10009905, y: 0.06731784, z: 5.7449336e+11}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8563029635338337770
 GameObject:
   m_ObjectHideFlags: 0
@@ -354,9 +410,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8563029635338337771}
+  - component: {fileID: 787678565779372550}
   m_Layer: 0
   m_Name: Bone.006
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -376,6 +433,19 @@ Transform:
   m_Father: {fileID: 8563029636734244260}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &787678565779372550
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563029635338337770}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.10009905, y: 0.03365757, z: 5.7449336e+11}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8563029635344751528
 GameObject:
   m_ObjectHideFlags: 0
@@ -385,9 +455,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8563029635344751529}
+  - component: {fileID: 2468235728695555897}
   m_Layer: 0
   m_Name: Bone.011
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -407,6 +478,19 @@ Transform:
   m_Father: {fileID: 8563029635338337771}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &2468235728695555897
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563029635344751528}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.10009905, y: 0.03365757, z: 5.7449336e+11}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8563029635393080047
 GameObject:
   m_ObjectHideFlags: 0
@@ -416,9 +500,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8563029635393080080}
+  - component: {fileID: 6420697482287620955}
   m_Layer: 0
   m_Name: Bone.002
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -438,6 +523,19 @@ Transform:
   m_Father: {fileID: 8563029636860192935}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &6420697482287620955
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563029635393080047}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.10009905, y: 0.03365757, z: 5.7449336e+11}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8563029635670110583
 GameObject:
   m_ObjectHideFlags: 0
@@ -447,9 +545,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8563029635670110584}
+  - component: {fileID: 3956396327438888813}
   m_Layer: 0
   m_Name: Bone.013
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -469,6 +568,19 @@ Transform:
   m_Father: {fileID: 8563029634999952243}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &3956396327438888813
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563029635670110583}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.10009905, y: 0.03365757, z: 5.7449336e+11}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8563029635866344093
 GameObject:
   m_ObjectHideFlags: 0
@@ -478,9 +590,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8563029635866344094}
+  - component: {fileID: 3308151782796399452}
   m_Layer: 0
   m_Name: Bone.004
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -500,6 +613,19 @@ Transform:
   m_Father: {fileID: 8563029636443123060}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &3308151782796399452
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563029635866344093}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.10009905, y: 0.03365757, z: 5.7449336e+11}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8563029636131931095
 GameObject:
   m_ObjectHideFlags: 0
@@ -509,9 +635,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8563029636131931096}
+  - component: {fileID: 9099848954860040257}
   m_Layer: 0
   m_Name: Bone.007
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -531,6 +658,19 @@ Transform:
   m_Father: {fileID: 8563029635143779963}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &9099848954860040257
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563029636131931095}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.10009905, y: 0.03365757, z: 5.7449336e+11}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8563029636199276582
 GameObject:
   m_ObjectHideFlags: 0
@@ -540,9 +680,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8563029636199276583}
+  - component: {fileID: 2265032598629739780}
   m_Layer: 0
   m_Name: Bone.001
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -562,6 +703,19 @@ Transform:
   m_Father: {fileID: 8563029635344751529}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &2265032598629739780
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563029636199276582}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.10009905, y: 0.03365757, z: 5.7449336e+11}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8563029636279694611
 GameObject:
   m_ObjectHideFlags: 0
@@ -573,7 +727,7 @@ GameObject:
   - component: {fileID: 8563029636279694612}
   m_Layer: 0
   m_Name: Armature
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -602,9 +756,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8563029636443123060}
+  - component: {fileID: 7980815180041704941}
   m_Layer: 0
   m_Name: Bone.008
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -624,6 +779,19 @@ Transform:
   m_Father: {fileID: 8563029635260208982}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &7980815180041704941
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563029636443123059}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.10009905, y: 0.03365757, z: 5.7449336e+11}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8563029636446314941
 GameObject:
   m_ObjectHideFlags: 0
@@ -633,9 +801,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8563029636446314942}
+  - component: {fileID: 6592613085446716661}
   m_Layer: 0
   m_Name: Bone.003
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -655,6 +824,19 @@ Transform:
   m_Father: {fileID: 8563029635670110584}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &6592613085446716661
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563029636446314941}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.10009905, y: 0.03365757, z: 5.7449336e+11}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8563029636596908377
 GameObject:
   m_ObjectHideFlags: 0
@@ -667,7 +849,7 @@ GameObject:
   - component: {fileID: 1443170609629468131}
   m_Layer: 0
   m_Name: Bendy Road
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -700,12 +882,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52a01a3fbfe246546af34b3c77415203, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  HEAD_ROT_SET: {x: 0, y: 0, z: 0}
-  BONE_ROT_SET: {x: 0, y: 0, z: 0}
   _topLeft: {fileID: 2461328652152173239}
   _topRight: {fileID: 477039393948851736}
   _bottomLeft: {fileID: 2328686863160800416}
   _bottomRight: {fileID: 2257403599847685027}
+  _middleLeft: {fileID: 0}
+  _middleRight: {fileID: 0}
+  _head: {fileID: 0}
   _bones:
   - {fileID: 8563029635866344093}
   - {fileID: 8563029636860192934}
@@ -728,9 +911,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8563029636640923371}
+  - component: {fileID: 8331143581935464711}
   m_Layer: 0
   m_Name: Bone.012
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -750,6 +934,19 @@ Transform:
   m_Father: {fileID: 8563029636199276583}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &8331143581935464711
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563029636640923370}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.10009905, y: 0.03365757, z: 5.7449336e+11}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8563029636734244259
 GameObject:
   m_ObjectHideFlags: 0
@@ -759,9 +956,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8563029636734244260}
+  - component: {fileID: 6008066204534047739}
   m_Layer: 0
   m_Name: Bone.010
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -781,6 +979,19 @@ Transform:
   m_Father: {fileID: 8563029635393080080}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &6008066204534047739
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563029636734244259}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.10009905, y: 0.03365757, z: 5.7449336e+11}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8563029636860192934
 GameObject:
   m_ObjectHideFlags: 0
@@ -790,9 +1001,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8563029636860192935}
+  - component: {fileID: 2051906998601815648}
   m_Layer: 0
   m_Name: Bone.009
-  m_TagString: Untagged
+  m_TagString: Road
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -812,3 +1024,16 @@ Transform:
   m_Father: {fileID: 8563029635866344094}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &2051906998601815648
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563029636860192934}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.10009905, y: 0.03365757, z: 5.7449336e+11}
+  m_Center: {x: 0, y: 0, z: 0}

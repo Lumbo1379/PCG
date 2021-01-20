@@ -9,6 +9,7 @@ public class RoadMapCreator : MonoBehaviour
 {
     [Header("Controllers", order = -1)]
     [SerializeField] BuildingCreator _buildingController;
+    [SerializeField] GardenController _gardenController;
 
     [Header("Perlin Generation", order = 0)]
     [SerializeField] private int _width = 256;
@@ -90,6 +91,8 @@ public class RoadMapCreator : MonoBehaviour
 
     private List<List<PlotMarker>> _finalDividedPlots;
 
+    private float _maxX, _minX, _maxZ, _minZ;
+
     private void Awake()
     {
         if (!_useSpecificSeed)
@@ -133,6 +136,12 @@ public class RoadMapCreator : MonoBehaviour
         NEXTPARCEL = new List<PlotMarker>();
 
         _finalDividedPlots = new List<List<PlotMarker>>();
+
+        _maxX = float.MinValue;
+        _maxZ = float.MinValue;
+
+        _minX = float.MaxValue;
+        _minZ = float.MaxValue;
     }
 
     private void Start()
@@ -350,6 +359,7 @@ public class RoadMapCreator : MonoBehaviour
             DividePlots();
 
             _buildingController.CreateBuildings(_finalDividedPlots, new Vector3(-_width / 2 * 20, 0, _length / 2 * 45));
+            _gardenController.PlantGarden(_minX, _maxX, _minZ, _maxZ);
         }
     }
 
@@ -907,8 +917,6 @@ public class RoadMapCreator : MonoBehaviour
         foreach (var plot in _plotContainers)
         {
             ParcelPlot(plot, plot[0].IsLeftCycle, plot);
-
-            //ValidateConnections(plot);
         }
     }
 
@@ -951,6 +959,11 @@ public class RoadMapCreator : MonoBehaviour
 
         for (int p = 0; p < plot.Count; p++)
         {
+            if (plot[p].transform.position.x < _minX) _minX = plot[p].transform.position.x;
+            if (plot[p].transform.position.x > _maxX) _maxX = plot[p].transform.position.x;
+            if (plot[p].transform.position.z < _minZ) _minZ = plot[p].transform.position.z;
+            if (plot[p].transform.position.z > _maxZ) _maxZ = plot[p].transform.position.z;
+
             int pAIndex;
             int pBIndex;
 
@@ -1013,69 +1026,6 @@ public class RoadMapCreator : MonoBehaviour
 
         pp1Marker.ShowConnectionRays();
         pp2Marker.ShowConnectionRays();
-
-        //{
-        //    Destroy(_previousBoundingBox[0]);
-        //    Destroy(_previousBoundingBox[1]);
-        //    Destroy(_previousBoundingBox[2]);
-        //    Destroy(_previousBoundingBox[3]);
-        //    Destroy(_previousBoundingBox[4]);
-
-        //    var centre = Instantiate(_plotPiece);
-        //    var centreMat = centre.GetComponent<MeshRenderer>().material;
-        //    centreMat.color = _highlightBoundingBoxColour;
-        //    centre.transform.position = new Vector3(boundingBox.Centre.x, -1, boundingBox.Centre.y);
-        //    _previousBoundingBox[0] = centre;
-
-        //    var corner1 = Instantiate(_plotPiece);
-        //    var corner1Mat = corner1.GetComponent<MeshRenderer>().material;
-        //    corner1Mat.color = _highlightBoundingBoxColour;
-        //    corner1.transform.position = new Vector3(boundingBox.Corners[0].x, -1, boundingBox.Corners[0].y);
-        //    _previousBoundingBox[1] = corner1;
-
-        //    var corner2 = Instantiate(_plotPiece);
-        //    var corner2Mat = corner2.GetComponent<MeshRenderer>().material;
-        //    corner2Mat.color = _highlightBoundingBoxColour;
-        //    corner2.transform.position = new Vector3(boundingBox.Corners[1].x, -1, boundingBox.Corners[1].y);
-        //    _previousBoundingBox[2] = corner2;
-
-        //    var corner3 = Instantiate(_plotPiece);
-        //    var corner3Mat = corner3.GetComponent<MeshRenderer>().material;
-        //    corner3Mat.color = _highlightBoundingBoxColour;
-        //    corner3.transform.position = new Vector3(boundingBox.Corners[2].x, -1, boundingBox.Corners[2].y);
-        //    _previousBoundingBox[3] = corner3;
-
-        //    var corner4 = Instantiate(_plotPiece);
-        //    var corner4Mat = corner4.GetComponent<MeshRenderer>().material;
-        //    corner4Mat.color = _highlightBoundingBoxColour;
-        //    corner4.transform.position = new Vector3(boundingBox.Corners[3].x, -1, boundingBox.Corners[3].y);
-        //    _previousBoundingBox[4] = corner4;
-
-        //    var b1p = Instantiate(_plotPiece);
-        //    b1p.transform.position = new Vector3(b1.x, 0, b1.y);
-
-        //    var b2p = Instantiate(_plotPiece);
-        //    b2p.transform.position = new Vector3(b2.x, 0, b2.y);
-
-        //    for (int p = 0; p < PLOTS.Length; p++)
-        //    {
-        //        var pm = PLOTS[p].GetComponent<MeshRenderer>();
-        //        pm.material.color = new Color32(255, 0, 0, 255); ;
-        //    }
-
-        //    PLOTS = new PlotMarker[plot.Count];
-
-        //    for (int p = 0; p < plot.Count; p++)
-        //    {
-        //        PLOTS[p] = plot[p];
-
-        //        var pm = plot[p].GetComponent<MeshRenderer>();
-        //        pm.material.color = new Color32(0, 255, 0, 255);
-        //    }
-
-        //    Debug.Log($"i1a: {i1AIndex} | i1b: {i1BIndex} | i2a: {i2AIndex} | i2b: {i2BIndex} | numberOfIntersection: {numberOfIntersections} | plotsInParcel: {plot.Count}");
-        //}
-
 
         var parcel1 = new List<PlotMarker>();
         parcel1.AddRange(plot.GetRange(i1AIndex, i1BIndex - i1AIndex));
