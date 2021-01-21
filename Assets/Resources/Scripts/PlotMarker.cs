@@ -400,6 +400,6 @@ public class PlotMarker : MonoBehaviour
     {
         _showConnectionRays = true;
 
-        _showRayCasts = true; // TODO: Remove this
+        //_showRayCasts = true; // TODO: Remove this
     }
 }

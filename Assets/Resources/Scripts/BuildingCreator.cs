@@ -173,6 +173,8 @@ public class BuildingCreator : MonoBehaviour
 
                 var blockMat = block.GetComponent<MeshRenderer>().material;
                 blockMat.SetColor("TintColour", tint);
+                blockMat.SetVector("OffsetWood", GetRandomOffset());
+                blockMat.SetVector("OffsetMarks", GetRandomOffset());
 
                 blocks = (int)((distance - gapsDistance) / BlockLength);
             }
@@ -190,6 +192,8 @@ public class BuildingCreator : MonoBehaviour
 
             var endBlockMat = endBlock.GetComponent<MeshRenderer>().material;
             endBlockMat.SetColor("TintColour", tint);
+            endBlockMat.SetVector("OffsetWood", GetRandomOffset());
+            endBlockMat.SetVector("OffsetMarks", GetRandomOffset());
         }
 
         Physics.SyncTransforms();
@@ -297,5 +301,13 @@ public class BuildingCreator : MonoBehaviour
 
         var meshCollider = grass.AddComponent<MeshCollider>();
         meshCollider.sharedMesh = mesh;
+    }
+
+    public Vector3 GetRandomOffset()
+    {
+        float x = Random.Range(0, 10.0f);
+        float y = Random.Range(0, 10.0f);
+
+        return new Vector3(x, y, 0);
     }
 }

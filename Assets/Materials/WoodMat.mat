@@ -93,6 +93,6 @@ Material:
     - DefaultColour: {r: 0.7372549, g: 0.51171404, b: 0.23921569, a: 0}
     - TintColour: {r: 1, g: 1, b: 1, a: 0}
     - Vector2_C839BD1: {r: 0, g: 0, b: 0, a: 0}
-    - Vector2_D3989779: {r: 1.06, g: 0, b: 0, a: 0}
+    - Vector2_D3989779: {r: 0, g: 0, b: 0, a: 0}
     - _Color: {r: 0.7169812, g: 0.6056655, b: 0.47686014, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

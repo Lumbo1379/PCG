@@ -48,7 +48,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1213616471487895199}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -92,6 +92,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a69fa558f9787c41ba2ac728cc2e409, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ROADCOLLISION: {fileID: 0}
+  CHECKAGAIN: 0
   _plotConnectionMask:
     serializedVersion: 2
     m_Bits: 256
