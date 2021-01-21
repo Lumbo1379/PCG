@@ -1968,8 +1968,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b62a24e5a6acdc04aa4b37bfa175dddd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _spacing: 100
-  _tree: {fileID: 7556494061447358597, guid: 48298297340adbd49bd62acdfcceb036, type: 3}
+  _spacing: 5
+  _resolution: 128
+  _gardenObjects:
+  - {fileID: 0}
+  - {fileID: 3621691143846428343, guid: 3df57c976f80a9d45b023e8a4195b842, type: 3}
+  - {fileID: 6971290809392598872, guid: 24082b9604f8a7f4f84db0864ceddea3, type: 3}
+  - {fileID: 402516283371732485, guid: 2cfecb031f45c9243baea4709bc5e703, type: 3}
+  - {fileID: 4503473940942554187, guid: 9260e1de479626049979889caeb6ff88, type: 3}
+  - {fileID: 6942272321963586391, guid: d28ac6ef8a2032144a93bdac943c146b, type: 3}
+  - {fileID: 4733468497087592453, guid: 0beacb98e88852848a59dd695cf5959b, type: 3}
+  _gardenObjectValues:
+  - 0
+  - 0.4
+  - 0.575
+  - 0.6
+  - 0.7
+  - 0.75
+  - 0.8
+  _generateFile: 1
 --- !u!1 &1743846228
 GameObject:
   m_ObjectHideFlags: 0

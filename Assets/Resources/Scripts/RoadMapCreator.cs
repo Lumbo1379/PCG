@@ -359,7 +359,7 @@ public class RoadMapCreator : MonoBehaviour
             DividePlots();
 
             _buildingController.CreateBuildings(_finalDividedPlots, new Vector3(-_width / 2 * 20, 0, _length / 2 * 45));
-            _gardenController.PlantGarden(_minX, _maxX, _minZ, _maxZ);
+            _gardenController.PlantGarden(_minX, _maxX, _minZ, _maxZ, _offsetX, _offsetY);
         }
     }
 
@@ -743,7 +743,7 @@ public class RoadMapCreator : MonoBehaviour
             }
         }
 
-        Debug.Log("Map wrote to file!");
+        Debug.Log("Road map wrote to file!");
     }
 
     private void ConnectRoad(int row, int column, bool[,] searched, int prevRow, int prevColumn)
