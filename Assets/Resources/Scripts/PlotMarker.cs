@@ -398,7 +398,7 @@ public class PlotMarker : MonoBehaviour
 
     public void ShowConnectionRays()
     {
-        _showConnectionRays = true;
+        //_showConnectionRays = true;
 
         //_showRayCasts = true; // TODO: Remove this
     }
