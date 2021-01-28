@@ -9,6 +9,11 @@ public class PlotMarker : MonoBehaviour
     public GameObject INTERSECTION_PARENT;
     public RoadPiece[] VALID_INTERSECTING_PIECES; 
     public List<RoadPiece> VALID_INTERSECTING_PIECES_CHECKED = new List<RoadPiece>();
+    public List<PlotMarker> SEARCHED_PIECES = new List<PlotMarker>();
+    public List<PlotMarker> SEARCHED_VALID_LEFT = new List<PlotMarker>();
+    public List<PlotMarker> SEARCHED_VALID_RIGHT = new List<PlotMarker>();
+    public List<GameObject> SEARCHED_COLLISIONS = new List<GameObject>();
+    public GameObject ERROR_PIECE;
 
     [Header("Plot Connections")]
     [SerializeField] private LayerMask _plotConnectionMask;
@@ -54,7 +59,7 @@ public class PlotMarker : MonoBehaviour
         _isInitialised = true;
         _isEnd = isEnd;
 
-        if (isLeftPlotMarker)
+        if (isLeftPlotMarker && !isEnd)
             _forwardDirection = transform.TransformDirection(Vector3.right);
         else
             _forwardDirection = transform.TransformDirection(Vector3.left);
@@ -64,15 +69,21 @@ public class PlotMarker : MonoBehaviour
 
     private void Update()
     {
-        if (_isInitialised && !_finishedMakingConnections && !_isEnd)
+        if (_isInitialised && !_finishedMakingConnections)
         {
             if (CanMakeInitialConnections())
                 MakeInitialConnections();
-            else if (Road.HeadConnection != null && !Road.HeadConnection.GetComponent<RoadPiece>().CanMakePlots)
-                MakeIntersectionConnections();
+            //else if (Road.HeadConnection != null && !Road.HeadConnection.GetComponent<RoadPiece>().CanMakePlots)
+                //MakeIntersectionConnections();
+            
+            if (_isEnd)
+                MakeEndConnection();
 
-            if (!IsEndPiece() && StillHasConnectionsToMake())
-                TrySearchForNewConnections();
+            if (StillHasConnectionsToMake())
+                MakeClosestValidConnection(SearchForNewConnections(Road, true));
+
+            //if (!IsEndPiece() && StillHasConnectionsToMake())
+                //TrySearchForNewConnections();
 
         }
 
@@ -249,6 +260,159 @@ public class PlotMarker : MonoBehaviour
         ShowConnectionRays();
     }
 
+    private void MakeEndConnection()
+    {
+        if (_isLeftPlotMarker)
+            LeftConnection = Road.BottomRightPlotMarker;
+        else
+            RightConnection = Road.BottomLeftPlotMarker;
+
+        if (Road.CanMakePlots)
+        {
+            if (_isLeftPlotMarker)
+            {
+                RightConnection = Road.LeftPlotMarker;
+                Road.LeftPlotMarker.LeftConnection = Road.BottomLeftPlotMarker;
+            }
+            else
+            {
+                LeftConnection = Road.RightPlotMarker;
+                Road.RightPlotMarker.RightConnection = Road.BottomRightPlotMarker;
+            }
+        }
+
+        ShowConnectionRays();
+    }
+
+    private List<PlotMarker> SearchForNewConnections(RoadPiece start, bool up)
+    {
+        var possibleConnections = new List<PlotMarker>();
+
+        GameObject dummy;
+
+        if (up)
+            dummy = start.HeadConnection;
+        else
+            dummy = start.gameObject; // Down may be end or another intersection immediately
+
+        RoadPiece dummyPreviousPiece = null;
+
+        while (dummy != null)
+        {
+            var dummyPiece = dummy.GetComponent<RoadPiece>();
+
+            if (dummyPiece.IsIntersection)
+            {
+                foreach (var intersectionPiece in dummyPiece.IntersectingRoads)
+                {
+                    if (dummyPreviousPiece == null && intersectionPiece == Road.gameObject) continue;
+                    if (dummyPreviousPiece == intersectionPiece.GetComponent<RoadPiece>()) continue;
+
+                    possibleConnections.AddRange(SearchForNewConnections(intersectionPiece.GetComponent<RoadPiece>(), false));
+                }
+
+                if (!up) // Handling duplicate comparison with concurrent intersections
+                    break;
+            }
+
+            if (dummyPiece.CanMakePlots)
+            {
+                possibleConnections.Add(dummyPiece.LeftPlotMarker);
+                possibleConnections.Add(dummyPiece.RightPlotMarker);
+
+                break;
+            }
+
+            if (!dummyPiece.TailConnected)
+            {
+                possibleConnections.Add(dummyPiece.BottomLeftPlotMarker);
+                possibleConnections.Add(dummyPiece.BottomRightPlotMarker);
+
+                break;
+            }
+
+            dummyPreviousPiece = dummyPiece;
+
+            if (up)
+                dummy = dummyPiece.HeadConnection;
+            else
+                dummy = dummyPiece.TailConnection;
+        }
+
+        return possibleConnections;
+    }
+
+    private void MakeClosestValidConnection(List<PlotMarker> possibleConnections)
+    {
+        SEARCHED_PIECES = possibleConnections;
+
+        var leftPossibleConnections = new List<PlotMarker>();
+        var rightPossibleConnections = new List<PlotMarker>();
+
+        foreach (var marker in possibleConnections)
+        {
+            if (!IsValidConnection(this, marker)) continue;
+
+            if (IsLeft(marker.transform.position - transform.position))
+                leftPossibleConnections.Add(marker);
+            else
+                rightPossibleConnections.Add(marker);
+        }
+
+        if (LeftConnection == null)
+        {
+            int closestIndex = -1;
+            float shortestDistance = float.MaxValue;
+
+            for (int i = 0; i < leftPossibleConnections.Count; i++)
+            {
+                var distance = Vector3.Distance(transform.position, leftPossibleConnections[i].transform.position);
+
+                if (distance < shortestDistance)
+                {
+                    shortestDistance = distance;
+                    closestIndex = i;
+                }
+
+                if (closestIndex != -1)
+                {
+                    LeftConnection = leftPossibleConnections[closestIndex];
+                    leftPossibleConnections[closestIndex].RightConnection = this;
+                }
+                else
+                    Debug.LogWarning("No valid left connection found!");
+            }
+        }
+
+        if (RightConnection == null)
+        {
+            int closestIndex = -1;
+            float shortestDistance = float.MaxValue;
+
+            for (int i = 0; i < rightPossibleConnections.Count; i++)
+            {
+                var distance = Vector3.Distance(transform.position, rightPossibleConnections[i].transform.position);
+
+                if (distance < shortestDistance)
+                {
+                    shortestDistance = distance;
+                    closestIndex = i;
+                }
+
+                if (closestIndex != -1)
+                {
+                    RightConnection = rightPossibleConnections[closestIndex];
+                    rightPossibleConnections[closestIndex].LeftConnection = this;
+                }
+                else
+                    Debug.LogWarning("No valid right connection found!");
+            }
+        }
+
+        SEARCHED_VALID_LEFT = leftPossibleConnections;
+        SEARCHED_VALID_RIGHT = rightPossibleConnections;
+    }
+
     private void TrySearchForNewConnections()
     {
         var roadBefore = Road.HeadConnection.GetComponent<RoadPiece>();
@@ -265,7 +429,7 @@ public class PlotMarker : MonoBehaviour
         {
             if (LeftConnection == null)
             {
-                if (IsValidConnection(roadAhead))
+                if (IsValidConnection(this, roadAhead.LeftPlotMarker))
                 {
                     LeftConnection = roadAhead.LeftPlotMarker;
                     roadAhead.LeftPlotMarker.RightConnection = Road.LeftPlotMarker;
@@ -274,7 +438,7 @@ public class PlotMarker : MonoBehaviour
 
             if (RightConnection == null)
             {
-                if (IsValidConnection(roadBefore))
+                if (IsValidConnection(this, roadBefore.LeftPlotMarker))
                 {
                     RightConnection = roadBefore.LeftPlotMarker;
                     roadBefore.LeftPlotMarker.LeftConnection = Road.LeftPlotMarker;
@@ -285,7 +449,7 @@ public class PlotMarker : MonoBehaviour
         {
             if (LeftConnection == null)
             {
-                if (IsValidConnection(roadBefore))
+                if (IsValidConnection(this, roadBefore.RightPlotMarker))
                 {
                     LeftConnection = roadBefore.RightPlotMarker;
                     roadBefore.RightPlotMarker.RightConnection = Road.RightPlotMarker;
@@ -294,7 +458,7 @@ public class PlotMarker : MonoBehaviour
 
             if (RightConnection == null)
             {
-                if (IsValidConnection(roadAhead))
+                if (IsValidConnection(this, roadAhead.RightPlotMarker))
                 {
                     RightConnection = roadAhead.RightPlotMarker;
                     roadAhead.RightPlotMarker.LeftConnection = Road.RightPlotMarker;
@@ -331,8 +495,17 @@ public class PlotMarker : MonoBehaviour
 
         PlotMarker dummy = marker.LeftConnection;
 
+        int comparions = 0;
+
         while (dummy != null)
         {
+            if (comparions == 30)
+            {
+                var errorPiece = Instantiate(ERROR_PIECE);
+                errorPiece.transform.position = dummy.transform.position;
+                break;
+            }
+
             if (dummy == this)
             {
                 IsLeftCycle = true;
@@ -351,8 +524,12 @@ public class PlotMarker : MonoBehaviour
                 dummy = dummy.ForwardConnection.LeftConnection;
                 cycleEncountered = true;
             }
+
+            comparions++;
         }
-        
+
+        comparions = 0;
+
         if (!cycleFound)
         {
             dummy = marker.RightConnection;
@@ -360,6 +537,13 @@ public class PlotMarker : MonoBehaviour
 
             while (dummy != null)
             {
+                if (comparions == 30)
+                {
+                    var errorPiece = Instantiate(ERROR_PIECE);
+                    errorPiece.transform.position = dummy.transform.position;
+                    break;
+                }
+
                 if (dummy == this)
                 {
                     cycleFound = true;
@@ -377,6 +561,8 @@ public class PlotMarker : MonoBehaviour
                     dummy = dummy.ForwardConnection.RightConnection;
                     cycleEncountered = true;
                 }
+
+                comparions++;
             }
         }
 
@@ -430,6 +616,19 @@ public class PlotMarker : MonoBehaviour
         return true;
     }
 
+    public bool IsValidConnection(PlotMarker p1, PlotMarker p2)
+    {
+        RaycastHit hit;
+
+        if (Physics.Raycast(p1.transform.position, p2.transform.position - p1.transform.position, out hit, Vector3.Distance(p1.transform.position, p2.transform.position), _plotConnectionMask))
+        {
+            SEARCHED_COLLISIONS.Add(hit.transform.gameObject);
+            return false;
+        }
+
+        return true;
+    }
+
     private bool IsEndPiece()
     {
         return !Road.HeadConnected || !Road.TailConnected;
@@ -445,6 +644,17 @@ public class PlotMarker : MonoBehaviour
         if (LeftConnection != null && LeftConnection.ForwardConnection != null) return true;
         if (RightConnection != null && RightConnection.ForwardConnection != null) return true;
         if (ForwardConnection != null) return true;
+
+        return false;
+    }
+
+    private bool IsLeft(Vector3 targetDirection)
+    {
+        var perpendicular = Vector3.Cross(_forwardDirection, targetDirection);
+        var direction = Vector3.Dot(perpendicular, -transform.forward);
+
+        if (direction < 0)
+            return true;
 
         return false;
     }

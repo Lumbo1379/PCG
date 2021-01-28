@@ -663,6 +663,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _buildingController: {fileID: 839469020}
   _gardenController: {fileID: 1671726965}
+  _generatePlots: 1
   _generateBuildings: 1
   _generateGardens: 1
   _width: 16
@@ -711,9 +712,9 @@ MonoBehaviour:
   _plotIndexToHighlightFinal: 0
   _highlightPlotFinal: 0
   PLOTS: []
-  _useSpecificSeed: 1
-  _seedX: 368
-  _seedY: 688
+  _useSpecificSeed: 0
+  _seedX: 542
+  _seedY: 849
   _car: {fileID: 1173705137}
 --- !u!1 &839469019
 GameObject:

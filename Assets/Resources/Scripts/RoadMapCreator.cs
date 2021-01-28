@@ -10,6 +10,7 @@ public class RoadMapCreator : MonoBehaviour
     [Header("Controllers", order = -1)]
     [SerializeField] private BuildingCreator _buildingController;
     [SerializeField] private GardenController _gardenController;
+    [SerializeField] private bool _generatePlots = true;
     [SerializeField] private bool _generateBuildings = true;
     [SerializeField] private bool _generateGardens = true;
 
@@ -362,16 +363,19 @@ public class RoadMapCreator : MonoBehaviour
 
             _plotContainersMapped = true;
 
-            DividePlots();
-
-            if (_generateBuildings)
+            if (_generatePlots)
             {
-                _buildingController.CreateBuildings(_finalDividedPlots, new Vector3(-_width / 2 * 20, 0, _length / 2 * 45));
+                DividePlots();
 
-                if (_generateGardens)
-                    _gardenController.PlantGarden(_minX, _maxX, _minZ, _maxZ, _offsetX, _offsetY);
+                if (_generateBuildings)
+                {
+                    _buildingController.CreateBuildings(_finalDividedPlots, new Vector3(-_width / 2 * 20, 0, _length / 2 * 45));
 
-                _car.Initialise(_roadMapObjects, _width, _length);
+                    if (_generateGardens)
+                        _gardenController.PlantGarden(_minX, _maxX, _minZ, _maxZ, _offsetX, _offsetY);
+
+                    _car.Initialise(_roadMapObjects, _width, _length);
+                }
             }
         }
     }
@@ -902,6 +906,7 @@ public class RoadMapCreator : MonoBehaviour
     private void PlacePlotMarkerPair(GameObject road)
     {
         var roadPiece = road.GetComponent<RoadPiece>();
+        roadPiece.SetColliders();
 
         if (!roadPiece.TailConnected)
         {
@@ -917,8 +922,11 @@ public class RoadMapCreator : MonoBehaviour
             plotBottomRight.transform.position = bottomRightRoadPiecePlotMarker.transform.position;
             plotBottomRight.transform.rotation = bottomRightRoadPiecePlotMarker.transform.rotation;
 
-            plotBottomLeft.GetComponent<PlotMarker>().Initialise(roadPiece, false, _plotContainers, this, true);
+            plotBottomLeft.GetComponent<PlotMarker>().Initialise(roadPiece, true, _plotContainers, this, true);
             plotBottomRight.GetComponent<PlotMarker>().Initialise(roadPiece, false, _plotContainers, this, true);
+
+            roadPiece.BottomLeftPlotMarker = plotBottomLeft.GetComponent<PlotMarker>();
+            roadPiece.BottomRightPlotMarker = plotBottomRight.GetComponent<PlotMarker>();
 
             PlotsToTryToMakeConnections += 2;
         }
@@ -1055,6 +1063,14 @@ public class RoadMapCreator : MonoBehaviour
 
         var pp1Marker = pp1.GetComponent<PlotMarker>();
         var pp2Marker = pp2.GetComponent<PlotMarker>();
+
+        if (!pp1Marker.IsValidConnection(pp1Marker, pp2Marker))
+        {
+            //_finalDividedPlots.Add(plot);
+
+            Debug.Log("Plot intersects road");
+            return;
+        }
 
         pp1Marker.IsParcelMarker = true;
         pp2Marker.IsParcelMarker = true;

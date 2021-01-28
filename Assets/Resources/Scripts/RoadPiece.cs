@@ -17,6 +17,9 @@ public class RoadPiece : MonoBehaviour
     [Header("Pieces", order = 1)]
     [SerializeField] private GameObject _head;
     [SerializeField] private GameObject[] _bones;
+    [SerializeField] private GameObject[] _endBones;
+    [SerializeField] private GameObject[] _colliders;
+    [SerializeField] private GameObject[] _endColliders;
 
     public bool CanMakePlots { get; set; }
     public bool IsIntersection { get; set; }
@@ -28,6 +31,8 @@ public class RoadPiece : MonoBehaviour
     public GameObject TailConnection { get; set; }
     public PlotMarker LeftPlotMarker { get; set; }
     public PlotMarker RightPlotMarker { get; set; }
+    public PlotMarker BottomLeftPlotMarker { get; set; }
+    public PlotMarker BottomRightPlotMarker { get; set; }
     public List<GameObject> IntersectingRoads { get; set; }
 
     public float IntersectionDecrease
@@ -79,5 +84,30 @@ public class RoadPiece : MonoBehaviour
 
         var newRotation = new Vector3(90, 0, rotation * _bones.Length);
         _head.transform.rotation = Quaternion.Euler(newRotation.x, newRotation.y, newRotation.z);
+    }
+
+    public void SetColliders()
+    {
+        float runningRotation = -HeadRotation * 12;
+
+        for (int i = 0; i < _endBones.Length / 2; i++)
+        {
+            _endColliders[i].transform.position = _endBones[i].transform.position;
+            _endColliders[i].transform.rotation = Quaternion.Euler(0, runningRotation, 0);
+        }
+
+        for (int i = 0; i < _colliders.Length; i++)
+        {
+            runningRotation += -_bones[i].transform.localRotation.eulerAngles.z;
+
+            _colliders[i].transform.position = _bones[i].transform.position;
+            _colliders[i].transform.rotation = Quaternion.Euler(0, runningRotation, 0);
+        }
+
+        for (int i = _endBones.Length / 2; i < _endBones.Length; i++)
+        {
+            _endColliders[i].transform.position = _endBones[i].transform.position;
+            _endColliders[i].transform.rotation = Quaternion.Euler(0, runningRotation, 0);
+        }
     }
 }
