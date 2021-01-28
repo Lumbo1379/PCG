@@ -8,6 +8,7 @@ public class GardenController : MonoBehaviour
     [Header("Construction", order = 0)]
     [SerializeField] private int _spacing;
     [SerializeField] private float _resolution;
+    [SerializeField] private LayerMask _mask;
 
     [Header("Garden Objects", order = 1)]
     [SerializeField] GameObject[] _gardenObjects;
@@ -15,6 +16,10 @@ public class GardenController : MonoBehaviour
 
     [Header("Debug Garden Generation", order = 2)]
     [SerializeField] private bool _generateFile;
+    [SerializeField] private GameObject _hitObjectGrass;
+    [SerializeField] private GameObject _hitObjectNotGrass;
+    [SerializeField] private GameObject _hitObjectNothing;
+    [SerializeField] private bool _showHits;
 
     private int _offsetX;
     private int _offsetY;
@@ -49,10 +54,16 @@ public class GardenController : MonoBehaviour
             {
                 var position = new Vector3(tempX, 1, tempZ);
 
-                if (Physics.Raycast(position, Vector3.down, out hit, 2))
+                if (Physics.Raycast(position, Vector3.down, out hit, 5, _mask))
                 {
                     if (hit.transform.tag == "Grass")
                     {
+                        if (_showHits)
+                        {
+                            var hitObject = Instantiate(_hitObjectGrass);
+                            hitObject.transform.position = new Vector3(tempX, 0, tempZ);
+                        }
+
                         var objectType = GetGardenObjectType(_gardenMap[row, column]);
                         var objectToPlace = GetObject(objectType);
 
@@ -62,7 +73,23 @@ public class GardenController : MonoBehaviour
                             placedObject.transform.position = new Vector3(tempX, 0, tempZ) + GetPositionBuffer();
                         }
                     }
+                    else
+                    {
+                        if (_showHits)
+                        {
+                            var hitObject = Instantiate(_hitObjectNotGrass);
+                            hitObject.transform.position = new Vector3(tempX, 0, tempZ);
+                        }
+                    }
                 }
+                //else
+                //{
+                //    if (_showHits)
+                //    {
+                //        var hitObject = Instantiate(_hitObjectNothing);
+                //        hitObject.transform.position = new Vector3(tempX, 0, tempZ);
+                //    }
+                //}
 
                 tempX += _spacing;
                 column++;

@@ -11,6 +11,8 @@ public class RoadPiece : MonoBehaviour
     [SerializeField] private GameObject _bottomRight;
     [SerializeField] private GameObject _middleLeft;
     [SerializeField] private GameObject _middleRight;
+    [SerializeField] private GameObject _bottomLeftMarker;
+    [SerializeField] private GameObject _bottomRightMarker;
 
     [Header("Pieces", order = 1)]
     [SerializeField] private GameObject _head;
@@ -26,6 +28,7 @@ public class RoadPiece : MonoBehaviour
     public GameObject TailConnection { get; set; }
     public PlotMarker LeftPlotMarker { get; set; }
     public PlotMarker RightPlotMarker { get; set; }
+    public List<GameObject> IntersectingRoads { get; set; }
 
     public float IntersectionDecrease
     {
@@ -43,9 +46,16 @@ public class RoadPiece : MonoBehaviour
     public GameObject GetBottomRight() { return _bottomRight; }
     public GameObject GetMiddleLeft() { return _middleLeft; }
     public GameObject GetMiddleRight() { return _middleRight; }
+    public GameObject GetBottomLeftMarker() { return _bottomLeftMarker; }
+    public GameObject GetBottomRightMarker() { return _bottomRightMarker; }
     public GameObject[] GetBones() { return _bones; }
 
     private float _intersectionDecrease = 0;
+
+    private void Awake()
+    {
+        IntersectingRoads = new List<GameObject>();
+    }
 
     public void SetBoneRotations(float rotation)
     {

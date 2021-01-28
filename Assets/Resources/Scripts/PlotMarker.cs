@@ -6,6 +6,9 @@ public class PlotMarker : MonoBehaviour
 {
     public GameObject ROADCOLLISION;
     public bool CHECKAGAIN = false;
+    public GameObject INTERSECTION_PARENT;
+    public RoadPiece[] VALID_INTERSECTING_PIECES; 
+    public List<RoadPiece> VALID_INTERSECTING_PIECES_CHECKED = new List<RoadPiece>();
 
     [Header("Plot Connections")]
     [SerializeField] private LayerMask _plotConnectionMask;
@@ -23,6 +26,7 @@ public class PlotMarker : MonoBehaviour
     public RoadPiece Road { get; set; }
 
     private bool _isInitialised;
+    private bool _isEnd;
     private bool _isLeftPlotMarker;
     private Vector3 _forwardDirection;
     private bool _triedToMakePlots;
@@ -41,13 +45,14 @@ public class PlotMarker : MonoBehaviour
         _finishedMakingConnections = false;
     }
 
-    public void Initialise(RoadPiece road, bool isLeftPlotMarker, List<List<PlotMarker>> plotContainers, RoadMapCreator roadMapCreator)
+    public void Initialise(RoadPiece road, bool isLeftPlotMarker, List<List<PlotMarker>> plotContainers, RoadMapCreator roadMapCreator, bool isEnd = false)
     {
         Road = road;
         _isLeftPlotMarker = isLeftPlotMarker;
         _plotContainers = plotContainers;
         _roadMapCreator = roadMapCreator;
         _isInitialised = true;
+        _isEnd = isEnd;
 
         if (isLeftPlotMarker)
             _forwardDirection = transform.TransformDirection(Vector3.right);
@@ -59,7 +64,7 @@ public class PlotMarker : MonoBehaviour
 
     private void Update()
     {
-        if (_isInitialised && !_finishedMakingConnections)
+        if (_isInitialised && !_finishedMakingConnections && !_isEnd)
         {
             if (CanMakeInitialConnections())
                 MakeInitialConnections();
@@ -127,43 +132,119 @@ public class PlotMarker : MonoBehaviour
     private void MakeIntersectionConnections()
     {
         var intersection = Road.HeadConnection.GetComponent<RoadPiece>();
+        var head = intersection;
 
-        while (intersection != null && intersection.HeadConnection != null && !intersection.CanMakePlots)
+        while (intersection != null && intersection.IntersectingRoads.Count <= 1)
             intersection = intersection.HeadConnection.GetComponent<RoadPiece>();
 
-        if (intersection == null || !intersection.CanMakePlots) return;
+        if (intersection == null) return;
 
-        RoadPiece intersectionTailTail = intersection.TailConnection.GetComponent<RoadPiece>();
+        INTERSECTION_PARENT = intersection.gameObject;
 
-        while (intersectionTailTail != null && intersectionTailTail.TailConnection != null && !intersectionTailTail.CanMakePlots)
-            intersectionTailTail = intersectionTailTail.TailConnection.GetComponent<RoadPiece>();
+        var validIntersectingPiece = new List<RoadPiece>();
 
-        if (_isLeftPlotMarker)
+        foreach (var intersectingPiece in intersection.IntersectingRoads)
         {
-            if (IsValidConnection(intersection))
+            var roadPiece = intersectingPiece.GetComponent<RoadPiece>();
+
+            if (roadPiece != head) validIntersectingPiece.Add(roadPiece);
+        }
+
+        VALID_INTERSECTING_PIECES = validIntersectingPiece.ToArray();
+
+        foreach (var intersectingPiece in validIntersectingPiece)
+        {
+            var dummy = intersectingPiece.gameObject;
+
+            while (dummy != null)
             {
-                RightConnection = intersection.LeftPlotMarker;
-                intersection.LeftPlotMarker.LeftConnection = Road.LeftPlotMarker;
+                var piece = dummy.GetComponent<RoadPiece>();
+
+                if (piece.CanMakePlots) break;
+
+                dummy = piece.TailConnection;
             }
-            else if (intersectionTailTail != null && intersectionTailTail.CanMakePlots && intersectionTailTail != Road)
+
+            if (dummy == null) continue;
+
+            var possibleConnection = dummy.GetComponent<RoadPiece>();
+
+            VALID_INTERSECTING_PIECES_CHECKED.Add(possibleConnection);
+
+            if (_isLeftPlotMarker)
             {
-                RightConnection = intersectionTailTail.RightPlotMarker;
-                intersectionTailTail.RightPlotMarker.LeftConnection = Road.LeftPlotMarker;
+                if (IsValidConnection(possibleConnection))
+                {
+                    RightConnection = possibleConnection.LeftPlotMarker;
+                    possibleConnection.LeftPlotMarker.LeftConnection = Road.LeftPlotMarker;
+
+                    break;
+                }
+                else if (IsValidConnection(possibleConnection, true))
+                {
+                    RightConnection = possibleConnection.RightPlotMarker;
+                    possibleConnection.RightPlotMarker.LeftConnection = Road.LeftPlotMarker;
+
+                    break;
+                }
+            }
+            else
+            {
+                if (IsValidConnection(possibleConnection))
+                {
+                    LeftConnection = possibleConnection.RightPlotMarker;
+                    possibleConnection.RightPlotMarker.RightConnection = Road.RightPlotMarker;
+
+                    break;
+                }
+                else if (IsValidConnection(possibleConnection, true))
+                {
+                    LeftConnection = possibleConnection.LeftPlotMarker;
+                    possibleConnection.LeftPlotMarker.RightConnection = Road.RightPlotMarker;
+
+                    break;
+                }
             }
         }
-        else
-        {
-            if (IsValidConnection(intersection))
-            {
-                LeftConnection = intersection.RightPlotMarker;
-                intersection.RightPlotMarker.RightConnection = Road.RightPlotMarker;
-            }
-            else if (intersectionTailTail != null && intersectionTailTail.CanMakePlots && intersectionTailTail != Road)
-            {
-                LeftConnection = intersectionTailTail.LeftPlotMarker;
-                intersectionTailTail.LeftPlotMarker.RightConnection = Road.RightPlotMarker;
-            }
-        }
+
+        //var intersection = Road.HeadConnection.GetComponent<RoadPiece>();
+
+        //while (intersection != null && intersection.HeadConnection != null && !intersection.CanMakePlots)
+        //    intersection = intersection.HeadConnection.GetComponent<RoadPiece>();
+
+        //if (intersection == null || !intersection.CanMakePlots) return;
+
+        //RoadPiece intersectionTailTail = intersection.TailConnection.GetComponent<RoadPiece>();
+
+        //while (intersectionTailTail != null && intersectionTailTail.TailConnection != null && !intersectionTailTail.CanMakePlots)
+        //    intersectionTailTail = intersectionTailTail.TailConnection.GetComponent<RoadPiece>();
+
+        //if (_isLeftPlotMarker)
+        //{
+        //    if (IsValidConnection(intersection))
+        //    {
+        //        RightConnection = intersection.LeftPlotMarker;
+        //        intersection.LeftPlotMarker.LeftConnection = Road.LeftPlotMarker;
+        //    }
+        //    else if (intersectionTailTail != null && intersectionTailTail.CanMakePlots && intersectionTailTail != Road)
+        //    {
+        //        RightConnection = intersectionTailTail.RightPlotMarker;
+        //        intersectionTailTail.RightPlotMarker.LeftConnection = Road.LeftPlotMarker;
+        //    }
+        //}
+        //else
+        //{
+        //    if (IsValidConnection(intersection))
+        //    {
+        //        LeftConnection = intersection.RightPlotMarker;
+        //        intersection.RightPlotMarker.RightConnection = Road.RightPlotMarker;
+        //    }
+        //    else if (intersectionTailTail != null && intersectionTailTail.CanMakePlots && intersectionTailTail != Road)
+        //    {
+        //        LeftConnection = intersectionTailTail.LeftPlotMarker;
+        //        intersectionTailTail.LeftPlotMarker.RightConnection = Road.RightPlotMarker;
+        //    }
+        //}
 
         ShowConnectionRays();
     }
@@ -313,20 +394,34 @@ public class PlotMarker : MonoBehaviour
         // Plot connections stored later
     }
 
-    private bool IsValidConnection(RoadPiece road)
+    private bool IsValidConnection(RoadPiece road, bool swap = false)
     {
         if (road == null) return false;
         if (!road.CanMakePlots) return false;
 
         Vector3 position;
 
-        if (_isLeftPlotMarker)
+        if (swap)
         {
-            position = road.LeftPlotMarker.transform.position;
+            if (!_isLeftPlotMarker)
+            {
+                position = road.LeftPlotMarker.transform.position;
+            }
+            else
+            {
+                position = road.RightPlotMarker.transform.position;
+            }
         }
         else
         {
-            position = road.RightPlotMarker.transform.position;
+            if (_isLeftPlotMarker)
+            {
+                position = road.LeftPlotMarker.transform.position;
+            }
+            else
+            {
+                position = road.RightPlotMarker.transform.position;
+            }
         }
 
         if (Physics.Raycast(transform.position, position - transform.position, Vector3.Distance(transform.position, position)))
@@ -398,8 +493,8 @@ public class PlotMarker : MonoBehaviour
 
     public void ShowConnectionRays()
     {
-        //_showConnectionRays = true;
+        _showConnectionRays = true;
 
-        //_showRayCasts = true; // TODO: Remove this
+        _showRayCasts = true; // TODO: Remove this
     }
 }

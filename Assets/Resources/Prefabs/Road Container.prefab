@@ -50,6 +50,8 @@ MonoBehaviour:
   _bottomRight: {fileID: 8985107477350352252}
   _middleLeft: {fileID: 1093833986459445863}
   _middleRight: {fileID: 4806739604989215669}
+  _bottomLeftMarker: {fileID: 3470068191323244410}
+  _bottomRightMarker: {fileID: 2151089370721271604}
   _head: {fileID: 1528854621323739014}
   _bones:
   - {fileID: 1528854622733845570}
@@ -964,6 +966,8 @@ Transform:
   m_Children:
   - {fileID: 7121730646411461378}
   - {fileID: 8785602689254916023}
+  - {fileID: 6852627074273143920}
+  - {fileID: 2997319012706304365}
   m_Father: {fileID: 1528854621932371207}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -980,6 +984,66 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.09999999, y: 0.038, z: 1.2228439e+11}
   m_Center: {x: 0, y: 0.011, z: 0}
+--- !u!1 &2151089370721271604
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2997319012706304365}
+  m_Layer: 8
+  m_Name: Bottom Right Marker
+  m_TagString: Road
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2997319012706304365
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2151089370721271604}
+  m_LocalRotation: {x: 0, y: 0, z: -0.7071068, w: 0.7071068}
+  m_LocalPosition: {x: -0.05, y: 0.17966, z: 0}
+  m_LocalScale: {x: 0.01, y: 0.010000001, z: 0}
+  m_Children: []
+  m_Father: {fileID: 1528854623279217846}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -90}
+--- !u!1 &3470068191323244410
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6852627074273143920}
+  m_Layer: 8
+  m_Name: Bottom Left Marker
+  m_TagString: Road
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6852627074273143920
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3470068191323244410}
+  m_LocalRotation: {x: 0, y: 0, z: -0.7071068, w: 0.7071068}
+  m_LocalPosition: {x: 0.05, y: 0.17966, z: 0}
+  m_LocalScale: {x: 0.01, y: 0.010000001, z: 0}
+  m_Children: []
+  m_Father: {fileID: 1528854623279217846}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -90}
 --- !u!1 &4740617389827296360
 GameObject:
   m_ObjectHideFlags: 0

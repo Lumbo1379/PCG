@@ -8,8 +8,10 @@ using UnityEngine.Rendering;
 public class RoadMapCreator : MonoBehaviour
 {
     [Header("Controllers", order = -1)]
-    [SerializeField] BuildingCreator _buildingController;
-    [SerializeField] GardenController _gardenController;
+    [SerializeField] private BuildingCreator _buildingController;
+    [SerializeField] private GardenController _gardenController;
+    [SerializeField] private bool _generateBuildings = true;
+    [SerializeField] private bool _generateGardens = true;
 
     [Header("Perlin Generation", order = 0)]
     [SerializeField] private int _width = 256;
@@ -25,6 +27,7 @@ public class RoadMapCreator : MonoBehaviour
     [Header("Plot Generation", order = 2)]
     [SerializeField] private GameObject _plotPiece;
     [SerializeField] [Range(0, 10000)] private float _minPlotArea;
+    [SerializeField] [Range(0, 1000)] private float _minPlotExtent;
 
     [Header("Debug Road Generation", order = 3)]
     [SerializeField] private TMP_Text _mapText;
@@ -64,6 +67,9 @@ public class RoadMapCreator : MonoBehaviour
     [SerializeField] private bool _useSpecificSeed;
     [SerializeField] private int _seedX;
     [SerializeField] private int _seedY;
+
+    [Header("Car", order = 8)]
+    [SerializeField] private CarController _car;
 
     public int PlotsToTryToMakeConnections { get; set; }
 
@@ -292,11 +298,11 @@ public class RoadMapCreator : MonoBehaviour
 
                 if (NEXTPARCEL.Count == 0)
                 {
-                    ParcelPlot(_plotContainers[_plotIndexToHighlightBB], _plotContainers[_plotIndexToHighlightBB][0].IsLeftCycle, _plotContainers[_plotIndexToHighlightBB]);
+                    ParcelPlot(_plotContainers[_plotIndexToHighlightBB], _plotContainers[_plotIndexToHighlightBB][0].IsLeftCycle, _plotContainers[_plotIndexToHighlightBB], 0);
                 }
                 else
                 {
-                    ParcelPlot(NEXTPARCEL, _plotContainers[_plotIndexToHighlightBB][0].IsLeftCycle, _plotContainers[_plotIndexToHighlightBB]);
+                    ParcelPlot(NEXTPARCEL, _plotContainers[_plotIndexToHighlightBB][0].IsLeftCycle, _plotContainers[_plotIndexToHighlightBB], 0);
                 }
             }
 
@@ -358,8 +364,15 @@ public class RoadMapCreator : MonoBehaviour
 
             DividePlots();
 
-            _buildingController.CreateBuildings(_finalDividedPlots, new Vector3(-_width / 2 * 20, 0, _length / 2 * 45));
-            _gardenController.PlantGarden(_minX, _maxX, _minZ, _maxZ, _offsetX, _offsetY);
+            if (_generateBuildings)
+            {
+                _buildingController.CreateBuildings(_finalDividedPlots, new Vector3(-_width / 2 * 20, 0, _length / 2 * 45));
+
+                if (_generateGardens)
+                    _gardenController.PlantGarden(_minX, _maxX, _minZ, _maxZ, _offsetX, _offsetY);
+
+                _car.Initialise(_roadMapObjects, _width, _length);
+            }
         }
     }
 
@@ -859,6 +872,8 @@ public class RoadMapCreator : MonoBehaviour
         var existingRoadPiece = existingRoad.GetComponent<RoadPiece>();
         var connectingRoadPiece = connectingRoad.GetComponent<RoadPiece>();
 
+        existingRoadPiece.IntersectingRoads.Add(connectingRoad);
+
         connectingRoadPiece.SetHeadRotation(existingRoadPiece.BoneRotation + existingRoadPiece.HeadRotation);
 
         var transformation = existingRoadPiece.GetBottomLeft().transform.position - connectingRoadPiece.GetTopLeft().transform.position;
@@ -888,6 +903,26 @@ public class RoadMapCreator : MonoBehaviour
     {
         var roadPiece = road.GetComponent<RoadPiece>();
 
+        if (!roadPiece.TailConnected)
+        {
+            var plotBottomLeft = Instantiate(_plotPiece);
+            var plotBottomRight = Instantiate(_plotPiece);
+
+            var bottomLeftRoadPiecePlotMarker = roadPiece.GetBottomLeftMarker();
+            var bottomRightRoadPiecePlotMarker = roadPiece.GetBottomRightMarker();
+
+            plotBottomLeft.transform.position = bottomLeftRoadPiecePlotMarker.transform.position;
+            plotBottomLeft.transform.rotation = bottomLeftRoadPiecePlotMarker.transform.rotation;
+
+            plotBottomRight.transform.position = bottomRightRoadPiecePlotMarker.transform.position;
+            plotBottomRight.transform.rotation = bottomRightRoadPiecePlotMarker.transform.rotation;
+
+            plotBottomLeft.GetComponent<PlotMarker>().Initialise(roadPiece, false, _plotContainers, this, true);
+            plotBottomRight.GetComponent<PlotMarker>().Initialise(roadPiece, false, _plotContainers, this, true);
+
+            PlotsToTryToMakeConnections += 2;
+        }
+
         if (roadPiece.HeadConnection != null && roadPiece.HeadConnection.GetComponent<RoadPiece>().IsIntersection) return; // Don't place plots on intersecting roads
 
         var plotLeft = Instantiate(_plotPiece);
@@ -916,19 +951,25 @@ public class RoadMapCreator : MonoBehaviour
     {
         foreach (var plot in _plotContainers)
         {
-            ParcelPlot(plot, plot[0].IsLeftCycle, plot);
+            ParcelPlot(plot, plot[0].IsLeftCycle, plot, 0);
         }
     }
 
-    private void ParcelPlot(List<PlotMarker> plot, bool isLeftCycle, List<PlotMarker> originalPlotList)
+    private void ParcelPlot(List<PlotMarker> plot, bool isLeftCycle, List<PlotMarker> originalPlotList, int depth)
     {
         var boundingBox = CreateOOB.GetMinRectangle(plot, isLeftCycle);
+
+        if (boundingBox.Extents[0] < _minPlotExtent && boundingBox.Extents[0] != 0 || boundingBox.Extents[1] < _minPlotExtent && boundingBox.Extents[1] != 0 || depth > 25)
+        {
+            Debug.Log($"Base: E0: {boundingBox.Extents[0]} | E1: {boundingBox.Extents[1]} | D: {depth}");
+            return;
+        }
 
         if (boundingBox.Area < _minPlotArea)
         {
             _finalDividedPlots.Add(plot);
 
-            Debug.Log("Minimum area reached");
+            Debug.Log("Minimum area");
             return;
         }
 
@@ -1050,8 +1091,8 @@ public class RoadMapCreator : MonoBehaviour
 
         //NEXTPARCEL = parcel1;
 
-        ParcelPlot(parcel1, isLeftCycle, originalPlotList);
-        ParcelPlot(parcel2, isLeftCycle, originalPlotList);
+        ParcelPlot(parcel1, isLeftCycle, originalPlotList, depth + 1);
+        ParcelPlot(parcel2, isLeftCycle, originalPlotList, depth + 1);
 
         originalPlotList.Add(pp1Marker);
         originalPlotList.Add(pp2Marker);
