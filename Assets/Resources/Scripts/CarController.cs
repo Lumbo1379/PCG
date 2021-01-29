@@ -11,11 +11,6 @@ public class CarController : MonoBehaviour
     [SerializeField] [Range(0, 5)] private float _torqueToSteerRatio = 2;
     [SerializeField] [Range(0, 5)] private float _minNextMarkerDistance = 1;
 
-    [SerializeField] private RoadPiece[] _PATH;
-    [SerializeField] private RoadPiece _START;
-    [SerializeField] private RoadPiece _TARGET;
-    [SerializeField] private RoadPiece _PATHPOINT;
-
     private float _steeringAngle;
     private int _markerIndex;
     private RoadPiece _target;
@@ -27,10 +22,16 @@ public class CarController : MonoBehaviour
     private List<RoadPiece> _path;
     private int _pathPointIndex;
     private Transform _pathPoint;
+    private GameObject[] _bones;
+    private int _boneIndex;
+    private int _intersectionCurrent;
+    private bool _swap;
 
     private void Awake()
     {
         _markerIndex = 0;
+        _boneIndex = 0;
+        _intersectionCurrent = 0;
         _isInitialised = false;
         _targets = new List<RoadPiece>();
     }
@@ -64,6 +65,7 @@ public class CarController : MonoBehaviour
     private void FindPath()
     {
         GetNextTarget();
+        _swap = true;
 
         var _currentPieceToStart = new List<RoadPiece>();
         var _targetToStart = new List<RoadPiece>();
@@ -91,36 +93,35 @@ public class CarController : MonoBehaviour
             dummy = dummyPiece.HeadConnection;
         }
 
-        int intersectionCurrent = -1;
+        _intersectionCurrent = -1;
         int intersectionTarget = -1;
 
         for (int i = 0; i < _currentPieceToStart.Count; i++)
         {
-            for (int k = 0; k <_targetToStart.Count; k++)
+            for (int k = 0; k < _targetToStart.Count; k++)
             {
                 if (_currentPieceToStart[i] == _targetToStart[k])
                 {
-                    intersectionCurrent = i;
+                    _intersectionCurrent = i;
                     intersectionTarget = k;
 
                     break;
                 }
             }
 
-            if (intersectionCurrent != -1) break;
+            if (_intersectionCurrent != -1) break;
         }
 
         _path = new List<RoadPiece>();
 
-        for (int i = 0; i < intersectionCurrent - 1; i++)
+        for (int i = 0; i < _intersectionCurrent - 1; i++)
             _path.Add(_currentPieceToStart[i]);
 
         for (int i = intersectionTarget - 1; i >= 0; i--)
             _path.Add(_targetToStart[i]);
 
-        _PATH = _path.ToArray();
-        _START = _currentRoad;
-        _TARGET = _target;
+        _bones = _path[0].GetBones();
+        _boneIndex = _bones.Length - 1;
 
         GetNextPathPoint();
     }
@@ -162,16 +163,49 @@ public class CarController : MonoBehaviour
             return;
         }
 
-        if (_pathPointIndex == _path.Count)
+        if (_pathPointIndex < _intersectionCurrent - 1)
         {
-            FindPath();
-            return;
-        }
+            if (_boneIndex < 0)
+            {
+                _pathPointIndex++;
 
-        _PATHPOINT = _path[_pathPointIndex];
-        _pathPoint = _path[_pathPointIndex].transform;
-        _currentRoad = _pathPoint.GetComponent<RoadPiece>();
-        _pathPointIndex++;
+                _bones = _path[_pathPointIndex].GetBones();
+                _currentRoad = _path[_pathPointIndex];
+                _boneIndex = _bones.Length - 1;
+                _pathPoint = _bones[_boneIndex].transform;
+            }
+            else
+            {
+                _pathPoint = _bones[_boneIndex].transform;
+                _boneIndex--;
+            }
+        }
+        else
+        {
+            if (_swap)
+            {
+                _boneIndex = 0;
+                _swap = false;
+            }
+
+            if (_boneIndex == _bones.Length)
+            {
+                _pathPointIndex++;
+
+                if (_pathPointIndex == _path.Count)
+                    FindPath();
+
+                _boneIndex = 0;
+                _bones = _path[_pathPointIndex].GetBones();
+                _pathPoint = _bones[_boneIndex].transform;
+                _currentRoad = _path[_pathPointIndex];
+            }
+            else
+            {
+                _pathPoint = _bones[_boneIndex].transform;
+                _boneIndex++;
+            }
+        }
     }
 
     private void Steer()
