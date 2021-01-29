@@ -697,6 +697,8 @@ MonoBehaviour:
   _plotIndexToHighlight: 0
   _highlightPlot: 0
   NEXTPARCEL: []
+  ERROR_PIECE: {fileID: 6583256064233721084, guid: 15f6094e4805efe42ac29dfcedf5a477,
+    type: 3}
   _debugBoundingBox: 0
   _highlightBoundingBoxColour:
     serializedVersion: 2
@@ -712,9 +714,9 @@ MonoBehaviour:
   _plotIndexToHighlightFinal: 0
   _highlightPlotFinal: 0
   PLOTS: []
-  _useSpecificSeed: 0
-  _seedX: 542
-  _seedY: 849
+  _useSpecificSeed: 1
+  _seedX: 368
+  _seedY: 688
   _car: {fileID: 1173705137}
 --- !u!1 &839469019
 GameObject:

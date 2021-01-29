@@ -16,8 +16,6 @@ public class CarController : MonoBehaviour
     [SerializeField] private RoadPiece _TARGET;
     [SerializeField] private RoadPiece _PATHPOINT;
 
-    private float _horizontalInput;
-    private float _verticalInput;
     private float _steeringAngle;
     private int _markerIndex;
     private RoadPiece _target;

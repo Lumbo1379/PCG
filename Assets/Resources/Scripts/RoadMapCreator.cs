@@ -48,6 +48,7 @@ public class RoadMapCreator : MonoBehaviour
     [SerializeField] private int _plotIndexToHighlight = 0;
     [SerializeField] private bool _highlightPlot = false;
     [SerializeField] private List<PlotMarker> NEXTPARCEL;
+    [SerializeField] private GameObject ERROR_PIECE;
 
     [Header("Debug Bounding Box Generation", order = 5)]
     [SerializeField] private bool _debugBoundingBox = false;
@@ -332,6 +333,15 @@ public class RoadMapCreator : MonoBehaviour
 
                 while (dummy != firstPlot)
                 {
+                    if (dummy == null)
+                    {
+                        var error = Instantiate(ERROR_PIECE);
+                        error.name = "error from plotStart";
+                        error.transform.position = plotStart[0].transform.position;
+                        plotStart.Clear();
+                        break;
+                    }
+
                     plotStart.Add(dummy);
 
                     if (firstPlot.IsLeftCycle)
@@ -357,6 +367,15 @@ public class RoadMapCreator : MonoBehaviour
                             plotStart.Add(dummy.ForwardConnection);
                             dummy = dummy.ForwardConnection.RightConnection;
                         }
+                    }
+
+                    if (plotStart.Count > 250)
+                    {
+                        var error = Instantiate(ERROR_PIECE);
+                        error.name = "error from plotStart";
+                        error.transform.position = plotStart[0].transform.position;
+                        plotStart.Clear();
+                        break;
                     }
                 }
             }
@@ -959,7 +978,8 @@ public class RoadMapCreator : MonoBehaviour
     {
         foreach (var plot in _plotContainers)
         {
-            ParcelPlot(plot, plot[0].IsLeftCycle, plot, 0);
+            if (plot.Count > 0)
+                ParcelPlot(plot, plot[0].IsLeftCycle, plot, 0);
         }
     }
 

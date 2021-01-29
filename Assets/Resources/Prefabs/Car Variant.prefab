@@ -23,9 +23,13 @@ MonoBehaviour:
   - {fileID: 2621288605957250404}
   - {fileID: 2629554393376315760}
   _maxSteerAngle: 30
-  _torque: 50
+  _torque: 115
   _torqueToSteerRatio: 2
   _minNextMarkerDistance: 1
+  _PATH: []
+  _START: {fileID: 0}
+  _TARGET: {fileID: 0}
+  _PATHPOINT: {fileID: 0}
 --- !u!1001 &7546358449761948278
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -91,7 +95,7 @@ PrefabInstance:
     - target: {fileID: 5535124333092561206, guid: 434b6c684b77b814ea8a7aca0fe26bc1,
         type: 3}
       propertyPath: m_Name
-      value: Car
+      value: Car Variant
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 5535124333092561205, guid: 434b6c684b77b814ea8a7aca0fe26bc1, type: 3}

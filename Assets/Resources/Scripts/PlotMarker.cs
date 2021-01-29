@@ -27,13 +27,12 @@ public class PlotMarker : MonoBehaviour
     public PlotMarker RightConnection { get; set; }
     public PlotMarker ForwardConnection { get; set; }
     public bool IsParcelMarker { get; set; }
-
     public RoadPiece Road { get; set; }
+    public Vector3 ForwardDirection { get; set; }
 
     private bool _isInitialised;
     private bool _isEnd;
     private bool _isLeftPlotMarker;
-    private Vector3 _forwardDirection;
     private bool _triedToMakePlots;
 
     private bool _showConnectionRays;
@@ -60,9 +59,9 @@ public class PlotMarker : MonoBehaviour
         _isEnd = isEnd;
 
         if (isLeftPlotMarker && !isEnd)
-            _forwardDirection = transform.TransformDirection(Vector3.right);
+            ForwardDirection = transform.TransformDirection(Vector3.right);
         else
-            _forwardDirection = transform.TransformDirection(Vector3.left);
+            ForwardDirection = transform.TransformDirection(Vector3.left);
 
         ShowConnectionRays();
     }
@@ -80,7 +79,12 @@ public class PlotMarker : MonoBehaviour
                 MakeEndConnection();
 
             if (StillHasConnectionsToMake())
-                MakeClosestValidConnection(SearchForNewConnections(Road, true));
+            {
+                var possibleConnections = SearchForNewConnections(Road, true);
+                possibleConnections.AddRange(SearchForNewConnections(Road, false, true));
+
+                MakeClosestValidConnection(possibleConnections);
+            }
 
             //if (!IsEndPiece() && StillHasConnectionsToMake())
                 //TrySearchForNewConnections();
@@ -284,7 +288,7 @@ public class PlotMarker : MonoBehaviour
         ShowConnectionRays();
     }
 
-    private List<PlotMarker> SearchForNewConnections(RoadPiece start, bool up)
+    private List<PlotMarker> SearchForNewConnections(RoadPiece start, bool up, bool firstDown = false)
     {
         var possibleConnections = new List<PlotMarker>();
 
@@ -315,12 +319,15 @@ public class PlotMarker : MonoBehaviour
                     break;
             }
 
-            if (dummyPiece.CanMakePlots)
+            if (!firstDown)
             {
-                possibleConnections.Add(dummyPiece.LeftPlotMarker);
-                possibleConnections.Add(dummyPiece.RightPlotMarker);
+                if (dummyPiece.CanMakePlots)
+                {
+                    possibleConnections.Add(dummyPiece.LeftPlotMarker);
+                    possibleConnections.Add(dummyPiece.RightPlotMarker);
 
-                break;
+                    break;
+                }
             }
 
             if (!dummyPiece.TailConnected)
@@ -337,6 +344,8 @@ public class PlotMarker : MonoBehaviour
                 dummy = dummyPiece.HeadConnection;
             else
                 dummy = dummyPiece.TailConnection;
+
+            firstDown = false;
         }
 
         return possibleConnections;
@@ -353,7 +362,7 @@ public class PlotMarker : MonoBehaviour
         {
             if (!IsValidConnection(this, marker)) continue;
 
-            if (IsLeft(marker.transform.position - transform.position))
+            if (IsLeft(marker.transform.position - transform.position, ForwardDirection))
                 leftPossibleConnections.Add(marker);
             else
                 rightPossibleConnections.Add(marker);
@@ -373,15 +382,18 @@ public class PlotMarker : MonoBehaviour
                     shortestDistance = distance;
                     closestIndex = i;
                 }
+            }
 
-                if (closestIndex != -1)
+            if (closestIndex != -1)
+            {
+                if (leftPossibleConnections.Count < 2 || !IsLeft(transform.position - leftPossibleConnections[closestIndex].transform.position, leftPossibleConnections[closestIndex].ForwardDirection))
                 {
                     LeftConnection = leftPossibleConnections[closestIndex];
                     leftPossibleConnections[closestIndex].RightConnection = this;
                 }
-                else
-                    Debug.LogWarning("No valid left connection found!");
             }
+            else
+                Debug.LogWarning("No valid left connection found!");
         }
 
         if (RightConnection == null)
@@ -398,15 +410,18 @@ public class PlotMarker : MonoBehaviour
                     shortestDistance = distance;
                     closestIndex = i;
                 }
+            }
 
-                if (closestIndex != -1)
+            if (closestIndex != -1)
+            {
+                if (rightPossibleConnections.Count < 2 || IsLeft(transform.position - rightPossibleConnections[closestIndex].transform.position, rightPossibleConnections[closestIndex].ForwardDirection))
                 {
                     RightConnection = rightPossibleConnections[closestIndex];
                     rightPossibleConnections[closestIndex].LeftConnection = this;
                 }
-                else
-                    Debug.LogWarning("No valid right connection found!");
             }
+            else
+                Debug.LogWarning("No valid right connection found!");
         }
 
         SEARCHED_VALID_LEFT = leftPossibleConnections;
@@ -472,7 +487,7 @@ public class PlotMarker : MonoBehaviour
         RaycastHit hit;
         RoadPiece roadHit = null;
 
-        if (Physics.Raycast(transform.position, _forwardDirection , out hit, _maxConnectionDistance, _plotConnectionMask))
+        if (Physics.Raycast(transform.position, ForwardDirection , out hit, _maxConnectionDistance, _plotConnectionMask))
         {
             roadHit = hit.transform.root.GetComponent<RoadPiece>();
         }
@@ -483,7 +498,12 @@ public class PlotMarker : MonoBehaviour
 
         PlotMarker marker;
 
-        if (IsCollisionOnLeftSide(hit.point, roadHit))
+        //if (IsCollisionOnLeftSide(hit.point, roadHit))
+        //    marker = roadHit.LeftPlotMarker;
+        //else
+        //    marker = roadHit.RightPlotMarker;
+
+        if (IsValidConnection(this, roadHit.LeftPlotMarker))
             marker = roadHit.LeftPlotMarker;
         else
             marker = roadHit.RightPlotMarker;
@@ -499,7 +519,7 @@ public class PlotMarker : MonoBehaviour
 
         while (dummy != null)
         {
-            if (comparions == 30)
+            if (comparions == 1000)
             {
                 var errorPiece = Instantiate(ERROR_PIECE);
                 errorPiece.transform.position = dummy.transform.position;
@@ -537,7 +557,7 @@ public class PlotMarker : MonoBehaviour
 
             while (dummy != null)
             {
-                if (comparions == 30)
+                if (comparions == 1000)
                 {
                     var errorPiece = Instantiate(ERROR_PIECE);
                     errorPiece.transform.position = dummy.transform.position;
@@ -648,9 +668,9 @@ public class PlotMarker : MonoBehaviour
         return false;
     }
 
-    private bool IsLeft(Vector3 targetDirection)
+    private bool IsLeft(Vector3 targetDirection, Vector3 forwardDirection)
     {
-        var perpendicular = Vector3.Cross(_forwardDirection, targetDirection);
+        var perpendicular = Vector3.Cross(forwardDirection, targetDirection);
         var direction = Vector3.Dot(perpendicular, -transform.forward);
 
         if (direction < 0)
@@ -685,9 +705,9 @@ public class PlotMarker : MonoBehaviour
                 Debug.DrawRay(transform.position, Vector3.Normalize(RightConnection.transform.position - transform.position) * Vector3.Distance(transform.position, RightConnection.transform.position), Color.blue);
 
             if (_isLeftPlotMarker)
-                Debug.DrawRay(transform.position, _forwardDirection * 10, Color.green);
+                Debug.DrawRay(transform.position, ForwardDirection * 10, Color.green);
             else
-                Debug.DrawRay(transform.position, _forwardDirection * 10, Color.green);
+                Debug.DrawRay(transform.position, ForwardDirection * 10, Color.green);
 
             if (ForwardConnection != null)
                 Debug.DrawRay(transform.position, Vector3.Normalize(ForwardConnection.transform.position - transform.position) * Vector3.Distance(transform.position, ForwardConnection.transform.position), Color.magenta);
@@ -703,8 +723,8 @@ public class PlotMarker : MonoBehaviour
 
     public void ShowConnectionRays()
     {
-        _showConnectionRays = true;
+        //_showConnectionRays = true;
 
-        _showRayCasts = true; // TODO: Remove this
+        //_showRayCasts = true; // TODO: Remove this
     }
 }
