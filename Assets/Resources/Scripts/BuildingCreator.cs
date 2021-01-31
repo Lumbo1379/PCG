@@ -24,7 +24,8 @@ public class BuildingCreator : MonoBehaviour
     [SerializeField] private int _zone2MinHeight;
 
     const float BlockLength = 3;
-    const float BlockWidth = 1; // Height is also 1
+    const float BlockWidth = 1;
+    const float BlockHeight = 2;
 
     public void CreateBuildings(List<List<PlotMarker>> plots, Vector3 centre)
     {
@@ -146,8 +147,8 @@ public class BuildingCreator : MonoBehaviour
         {
             // Check for existing wall
 
-            var hitsFromA = Physics.OverlapSphere(a.transform.position + (direction * BlockLength / 3) + new Vector3(0, BlockWidth * w, 0), 0.1f);
-            var hitsFromB = Physics.OverlapSphere(b.transform.position - (direction * BlockLength / 3) + new Vector3(0, BlockWidth * w, 0), 0.1f);
+            var hitsFromA = Physics.OverlapSphere(a.transform.position + (direction * BlockLength / 3) + new Vector3(0, BlockHeight * w, 0), 0.1f);
+            var hitsFromB = Physics.OverlapSphere(b.transform.position - (direction * BlockLength / 3) + new Vector3(0, BlockHeight * w, 0), 0.1f);
             //var hits = Physics.OverlapSphere(halfWay, 1f);
             if (hitsFromA.Length > 0 && hitsFromB.Length > 0) continue;
             //if (hits.Length > 0) continue;
@@ -168,7 +169,7 @@ public class BuildingCreator : MonoBehaviour
                 block.transform.position = startPoint;
                 block.transform.rotation = rotation;
                 block.transform.Translate(-(buffer + new Vector3(0, BlockLength, 0) * i + new Vector3(0, gapsDistance, 0)));
-                block.transform.Translate(new Vector3(BlockWidth * w, 0, 0));
+                block.transform.Translate(new Vector3(BlockHeight * w, 0, 0));
                 block.transform.position += block.transform.forward * 0.1f;
 
                 var blockMat = block.GetComponent<MeshRenderer>().material;
@@ -187,7 +188,7 @@ public class BuildingCreator : MonoBehaviour
             endBlock.transform.localScale = new Vector3(endBlock.transform.localScale.x, endBlock.transform.localScale.y * (remainingDistance / BlockLength), endBlock.transform.localScale.z);
             Vector3 endBuffer = new Vector3(0, remainingDistance / 2, 0);
             endBlock.transform.Translate(-(endBuffer + new Vector3(0, BlockLength, 0) * blocks + new Vector3(0, gapsDistance, 0)));
-            endBlock.transform.Translate(new Vector3(BlockWidth * w, 0, 0));
+            endBlock.transform.Translate(new Vector3(BlockHeight * w, 0, 0));
             endBlock.transform.position += endBlock.transform.forward * 0.1f;
 
             var endBlockMat = endBlock.GetComponent<MeshRenderer>().material;
@@ -258,7 +259,7 @@ public class BuildingCreator : MonoBehaviour
         var meshFilter = roof.AddComponent<MeshFilter>();
         meshFilter.mesh = mesh;
 
-        roof.transform.position = new Vector3(0, height * BlockWidth - BlockWidth / 2 + 0.01f, 0);
+        roof.transform.position = new Vector3(0, height * BlockHeight - BlockHeight / 2 + 0.01f, 0);
     }
 
     private void CreateGrassedArea(List<PlotMarker> plot)
