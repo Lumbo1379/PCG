@@ -147,8 +147,8 @@ public class BuildingCreator : MonoBehaviour
         {
             // Check for existing wall
 
-            var hitsFromA = Physics.OverlapSphere(a.transform.position + (direction * BlockLength / 3) + new Vector3(0, BlockHeight * w, 0), 0.1f);
-            var hitsFromB = Physics.OverlapSphere(b.transform.position - (direction * BlockLength / 3) + new Vector3(0, BlockHeight * w, 0), 0.1f);
+            var hitsFromA = Physics.OverlapSphere(a.transform.position + (direction * BlockLength / 3) + new Vector3(0, BlockHeight * w, 0), 0.1f, _mask);
+            var hitsFromB = Physics.OverlapSphere(b.transform.position - (direction * BlockLength / 3) + new Vector3(0, BlockHeight * w, 0), 0.1f, _mask);
             //var hits = Physics.OverlapSphere(halfWay, 1f);
             if (hitsFromA.Length > 0 && hitsFromB.Length > 0) continue;
             //if (hits.Length > 0) continue;

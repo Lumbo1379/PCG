@@ -411,6 +411,8 @@ public class RoadMapCreator : MonoBehaviour
 
         CheckKillNeighbours();
 
+        _roadMap[0, _width / 4] = true; // Make sure map is not skewed of to right
+
         while (_islands == null || _islands.Count > 1)
         {
             FindIslands();
