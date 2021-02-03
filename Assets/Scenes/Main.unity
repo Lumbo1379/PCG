@@ -1107,8 +1107,8 @@ MonoBehaviour:
   _highlightPlotFinal: 0
   PLOTS: []
   _useSpecificSeed: 0
-  _seedX: 368
-  _seedY: 688
+  _seedX: 811
+  _seedY: 58
   _car: {fileID: 1173705137}
 --- !u!1 &839469019
 GameObject:
@@ -1634,7 +1634,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1246722206
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2140,7 +2140,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1609622120
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2937,7 +2937,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &2028651925
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3310,7 +3310,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1003685665835630}
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -175, y: -0.5, z: -0}
+  m_LocalPosition: {x: -175, y: -0.01, z: -0}
   m_LocalScale: {x: 250, y: 250, z: 250}
   m_Children:
   - {fileID: 4030719969943666}

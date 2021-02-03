@@ -48,6 +48,8 @@ public class GardenController : MonoBehaviour
         int row = 0;
         int column = 0;
 
+        var valid = new bool[z, x];
+
         while (row < z)
         {
             while (column < x)
@@ -57,39 +59,8 @@ public class GardenController : MonoBehaviour
                 if (Physics.Raycast(position, Vector3.down, out hit, 5, _mask))
                 {
                     if (hit.transform.tag == "Grass")
-                    {
-                        if (_showHits)
-                        {
-                            var hitObject = Instantiate(_hitObjectGrass);
-                            hitObject.transform.position = new Vector3(tempX, 0, tempZ);
-                        }
-
-                        var objectType = GetGardenObjectType(_gardenMap[row, column]);
-                        var objectToPlace = GetObject(objectType);
-
-                        if (objectToPlace != null)
-                        {
-                            var placedObject = Instantiate(objectToPlace);
-                            placedObject.transform.position = new Vector3(tempX, 0, tempZ) + GetPositionBuffer();
-                        }
-                    }
-                    else
-                    {
-                        if (_showHits)
-                        {
-                            var hitObject = Instantiate(_hitObjectNotGrass);
-                            hitObject.transform.position = new Vector3(tempX, 0, tempZ);
-                        }
-                    }
+                        valid[row, column] = true;
                 }
-                //else
-                //{
-                //    if (_showHits)
-                //    {
-                //        var hitObject = Instantiate(_hitObjectNothing);
-                //        hitObject.transform.position = new Vector3(tempX, 0, tempZ);
-                //    }
-                //}
 
                 tempX += _spacing;
                 column++;
@@ -100,6 +71,48 @@ public class GardenController : MonoBehaviour
 
             row++;
             column = 0;
+        }
+
+        tempZ = minZ - _spacing;
+        tempX = minX;
+
+        for (int r = 0; r < z; r++)
+        {
+            for (int c = 0; c < x; c++)
+            {
+                tempX += _spacing;
+                column++;
+
+                if (r != 0 && c != 0 && !valid[r - 1, c - 1]) continue;
+                if (r != 0 && !valid[r - 1, c]) continue;
+                if (r != 0 && c < x - 1 && !valid[r - 1, c + 1]) continue;
+                if (c != 0 && !valid[r, c - 1]) continue;
+                if (c < x - 1 && !valid[r, c + 1]) continue;
+                if (r < z - 1 && c != 0 && !valid[r + 1, c - 1]) continue;
+                if (r < z - 1 && !valid[r + 1, c]) continue;
+                if (r < z - 1 && c < x - 1 && !valid[r + 1, c + 1]) continue;
+
+                if (valid[r, c])
+                {
+                    if (_showHits)
+                    {
+                        var hitObject = Instantiate(_hitObjectGrass);
+                        hitObject.transform.position = new Vector3(tempX, 0, tempZ);
+                    }
+
+                    var objectType = GetGardenObjectType(_gardenMap[r, c]);
+                    var objectToPlace = GetObject(objectType);
+
+                    if (objectToPlace != null)
+                    {
+                        var placedObject = Instantiate(objectToPlace);
+                        placedObject.transform.position = new Vector3(tempX, 0, tempZ) + GetPositionBuffer();
+                    }
+                }
+            }
+
+            tempX = minX - _spacing;
+            tempZ += _spacing;
         }
     }
 
